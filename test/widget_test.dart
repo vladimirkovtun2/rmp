@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.7'),
+      find.text('Лабораторная работа №2.8'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
-    // Низ списка
-    for (final n in ['11', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7']) {
+    // Низ списка (видны последние ~7 работ)
+    for (final n in ['2.5', '2.6', '2.7', '2.8']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -418,6 +418,51 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(SnackBar), findsWidgets);
+  });
+
+  testWidgets('Лабораторная 2.8: полный цикл CRUD', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.8');
+
+    // Добавляем две записи (в тесте БД — резервный режим в памяти)
+    await tester.enterText(find.byType(TextField), 'Анна');
+    await tester.pump();
+    await tester.tap(find.text('Добавить запись'));
+    await tester.pump();
+    expect(find.text('Анна'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Ян');
+    await tester.pump();
+    await tester.tap(find.text('Добавить запись'));
+    await tester.pump();
+    expect(find.text('Ян'), findsOneWidget);
+
+    // Сортировка по имени по убыванию: «Ян» выше «Анны»
+    await tester.tap(find.text('Сортировка по имени'));
+    await tester.pump();
+    expect(
+      tester.getTopLeft(find.text('Ян')).dy,
+      lessThan(tester.getTopLeft(find.text('Анна')).dy),
+    );
+
+    // Редактирование первой видимой записи
+    await tester.tap(find.byIcon(Icons.edit).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.text('Редактировать запись'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, 'Ольга');
+    await tester.pump();
+    await tester.tap(find.text('Сохранить'));
+    await _settle(tester);
+    expect(find.text('Ольга'), findsOneWidget);
+
+    // Удаление первой записи (после перечитывания список без сортировки:
+    // первой идёт «Анна»)
+    await tester.tap(find.byIcon(Icons.delete).first);
+    await tester.pump();
+    expect(find.text('Анна'), findsNothing);
+    expect(find.text('Ольга'), findsOneWidget);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (

@@ -14,6 +14,7 @@ import 'lab_2_4/lab_24_screen.dart';
 import 'lab_2_5/lab_25_screen.dart';
 import 'lab_2_6/lab_26_screen.dart';
 import 'lab_2_7/lab_27_screen.dart';
+import 'lab_2_8/lab_28_screen.dart';
 
 /// Описание одной лабораторной работы для главного экрана.
 class LabInfo {
@@ -119,5 +120,11 @@ final List<LabInfo> labs = [
     title: 'Лабораторная работа №2.7',
     description: 'Работа с файлами',
     builder: (_) => const Lab27Screen(),
+  ),
+  LabInfo(
+    number: '2.8',
+    title: 'Лабораторная работа №2.8',
+    description: 'SQLite: CRUD',
+    builder: (_) => const Lab28Screen(),
   ),
 ];

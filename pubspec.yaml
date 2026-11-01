@@ -43,6 +43,8 @@ dependencies:
   file_selector: ^1.1.0
   file_picker: ^13.3.0
   audio_service: ^0.18.19
+  sqflite: ^2.4.2+1
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:
