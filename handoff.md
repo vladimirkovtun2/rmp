@@ -222,16 +222,28 @@ AnimatedBuilder (значения контроллеров передаются 
 
 ## Лабораторная №2.6 «Мультимедиа»
 
-`lib/labs/lab_2_6/lab_26_screen.dart` — аудиоплеер по методичке на
-пакете `audioplayers` (6.x): play/pause/stop с ключами play_button /
-pause_button / stop_button, ползунок позиции (seek), подписки на потоки
-`onDurationChanged` / `onPositionChanged` / `onPlayerComplete` /
-`onPlayerStateChanged`, защищённый setState (mounted). Плюс выбор трека
-на устройстве через `file_selector` (`openFile`, audio/*): файл
-материализуется в кэш и играется через `DeviceFileSource`.
-Зависимости: `audioplayers`, `file_selector`.
+`lib/labs/lab_2_6/lab_26_screen.dart` — аудиоплеер по методичке:
+play/pause/stop с ключами play_button / pause_button / stop_button,
+ползунок позиции (seek), выбор трека на устройстве (`file_selector`,
+audio/* → `DeviceFileSource`).
 
-Особенность: «стоп» реализован как `pause()` + `seek(0)`, а не
+Плеер вынесен в `lib/labs/lab_2_6/lab_audio_handler.dart` — обёртка
+AudioPlayer в MediaSession через пакет `audio_service`: система сама
+рисует плеер в шторке уведомлений (на HyperOS — музыкальная шторка),
+на экране блокировки и на кнопках гарнитуры; UI этого не требуется.
+
+Два обязательных требования audio_service (иначе падает инициализация):
+1. `AudioService.init` вызывается ОДИН РАЗ при старте приложения —
+   глобальный хендлер создаётся в `main()` (`lib/main.dart`) до runApp;
+2. MainActivity наследует `AudioServiceActivity` вместо `FlutterActivity`
+   (иначе PlatformException «activity... has not provided the correct
+   FlutterEngine»).
+
+Манифест для шторки: разрешения FOREGROUND_SERVICE и
+FOREGROUND_SERVICE_MEDIA_PLAYBACK, сервис `com.ryanheise.audioservice
+.AudioService` (mediaPlayback) и `MediaButtonReceiver`.
+
+Особенность: «стоп» везде реализован как `pause()` + `seek(0)`, а не
 `player.stop()` — в audioplayers stop() освобождает источник, и после
 него resume() играть нечего (трек пришлось бы выбирать заново).
 

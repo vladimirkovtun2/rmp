@@ -1,5 +1,7 @@
 package com.example.rmp_9plus
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 
-class MainActivity : FlutterActivity()
+// AudioServiceActivity — требование пакета audio_service (лаба 2.6):
+// предоставляет общий FlutterEngine для фонового медиасервиса
+class MainActivity : AudioServiceActivity()

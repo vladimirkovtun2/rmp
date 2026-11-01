@@ -1,13 +1,17 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
+import 'lab_audio_handler.dart';
+
 /// Лабораторная работа №2.6 — воспроизведение аудио (audioplayers).
 ///
-/// Плеер по методичке: play/pause/stop, ползунок позиции, подписки на
-/// события плеера. Плюс выбор трека с устройства (file_selector).
+/// Плеер по методичке: play/pause/stop, ползунок позиции, выбор трека
+/// на устройстве. Воспроизведением управляет глобальный LabAudioHandler
+/// (создан в main) — обёртка в MediaSession, поэтому плеер доступен из
+/// шторки уведомлений, с экрана блокировки и с кнопок гарнитуры.
 class Lab26Screen extends StatefulWidget {
   const Lab26Screen({super.key});
 
@@ -16,54 +20,53 @@ class Lab26Screen extends StatefulWidget {
 }
 
 class _Lab26ScreenState extends State<Lab26Screen> {
-  late final AudioPlayer _player;
+  StreamSubscription<PlaybackState>? _stateSubscription;
+  StreamSubscription<MediaItem?>? _itemSubscription;
 
-  PlayerState? _playerState;
+  bool _hasTrack = false;
+  bool _playing = false;
+  bool _paused = false;
   Duration? _duration;
-  Duration? _position;
+  Duration _position = Duration.zero;
   String _trackName = 'Трек не выбран';
 
-  StreamSubscription<Duration>? _durationSubscription;
-  StreamSubscription<Duration>? _positionSubscription;
-  StreamSubscription<void>? _playerCompleteSubscription;
-  StreamSubscription<PlayerState>? _playerStateChangeSubscription;
-
-  bool get _isPlaying => _playerState == PlayerState.playing;
-  bool get _isPaused => _playerState == PlayerState.paused;
-
-  bool get _hasTrack => _duration != null;
+  bool get _isPlaying => _playing;
+  bool get _isPaused => _paused;
 
   String get _durationText => _duration?.toString().split('.').first ?? '';
-  String get _positionText => _position?.toString().split('.').first ?? '';
+  String get _positionText => _position.toString().split('.').first;
 
   @override
   void initState() {
     super.initState();
-    _player = AudioPlayer();
-    _playerState = _player.state;
-    _player.getDuration().then((value) => setState(() => _duration = value));
-    _player
-        .getCurrentPosition()
-        .then((value) => setState(() => _position = value));
-    _initStreams();
-  }
-
-  void _initStreams() {
-    _durationSubscription = _player.onDurationChanged.listen(
-      (duration) => setState(() => _duration = duration),
-    );
-    _positionSubscription = _player.onPositionChanged.listen(
-      (position) => setState(() => _position = position),
-    );
-    _playerCompleteSubscription = _player.onPlayerComplete.listen((_) {
+    // Хендлер создан в main; здесь только подписываемся на его потоки
+    final handler = labAudioHandler;
+    if (handler == null) return;
+    // Состояние может уже существовать (трек играет с прошлого раза)
+    _playing = handler.playbackState.value.playing;
+    final item = handler.mediaItem.value;
+    if (item != null) {
+      _hasTrack = true;
+      _trackName = item.title;
+      _duration = item.duration;
+    }
+    _stateSubscription = handler.playbackState.listen((state) {
       setState(() {
-        _playerState = PlayerState.stopped;
-        _position = Duration.zero;
+        _playing = state.playing;
+        if (state.playing) _paused = false;
+        if (state.processingState != AudioProcessingState.idle) {
+          _position = state.updatePosition;
+        }
       });
     });
-    _playerStateChangeSubscription = _player.onPlayerStateChanged.listen(
-      (state) => setState(() => _playerState = state),
-    );
+    _itemSubscription = handler.mediaItem.listen((item) {
+      if (item == null) return;
+      setState(() {
+        _hasTrack = true;
+        _trackName = item.title;
+        _duration = item.duration;
+      });
+    });
   }
 
   // ====== Выбор трека на устройстве ======
@@ -77,38 +80,47 @@ class _Lab26ScreenState extends State<Lab26Screen> {
     final file = await openFile(acceptedTypeGroups: const [audioGroup]);
     if (file == null) return; // пользователь отменил выбор
 
-    await _player.setSource(DeviceFileSource(file.path));
-    final duration = await _player.getDuration();
-    setState(() {
-      _trackName = file.name;
-      _duration = duration;
-      _position = Duration.zero;
-      _playerState = PlayerState.stopped;
-    });
+    final handler = labAudioHandler;
+    if (handler == null) {
+      _showMessage('Плеер недоступен: ${labAudioHandlerError ?? 'неизвестная ошибка'}');
+      return;
+    }
+    await handler.setTrack(file.path, file.name);
   }
 
   // ====== Управление воспроизведением ======
 
   Future<void> _play() async {
-    await _player.resume();
-    setState(() => _playerState = PlayerState.playing);
+    await labAudioHandler?.play();
+    if (!mounted) return;
+    setState(() {
+      _playing = true;
+      _paused = false;
+    });
   }
 
   Future<void> _pause() async {
-    await _player.pause();
-    setState(() => _playerState = PlayerState.paused);
+    await labAudioHandler?.pause();
+    if (!mounted) return;
+    setState(() {
+      _playing = false;
+      _paused = true;
+    });
   }
 
   Future<void> _stop() async {
-    // НЕ player.stop(): в audioplayers он освобождает источник, и после
-    // него resume() уже нечего играть — трек пришлось бы выбирать заново.
-    // Пауза + сброс позиции даёт «стоп» без потери источника.
-    await _player.pause();
-    await _player.seek(Duration.zero);
+    await labAudioHandler?.stop();
+    if (!mounted) return;
     setState(() {
-      _playerState = PlayerState.stopped;
+      _playing = false;
+      _paused = true;
       _position = Duration.zero;
     });
+  }
+
+  void _showMessage(String text) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(text)));
   }
 
   // Подписки могут срабатывать после dispose — обновляем состояние
@@ -122,17 +134,17 @@ class _Lab26ScreenState extends State<Lab26Screen> {
 
   @override
   void dispose() {
-    _durationSubscription?.cancel();
-    _positionSubscription?.cancel();
-    _playerCompleteSubscription?.cancel();
-    _playerStateChangeSubscription?.cancel();
-    _player.dispose();
+    _stateSubscription?.cancel();
+    _itemSubscription?.cancel();
+    // Хендлер и плеер НЕ уничтожаем: воспроизведение продолжается
+    // в фоне, управление — из шторки
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).primaryColor;
+    final handlerReady = labAudioHandler != null;
     return Scaffold(
       appBar: AppBar(title: const Text('Лабораторная работа №2.6')),
       body: Center(
@@ -143,6 +155,24 @@ class _Lab26ScreenState extends State<Lab26Screen> {
               _trackName,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
+            const SizedBox(height: 4),
+            Text(
+              'Управление доступно из шторки уведомлений',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            ),
+            if (!handlerReady) ...[
+              const SizedBox(height: 4),
+              Text(
+                labAudioHandlerError != null
+                    ? 'Ошибка плеера: $labAudioHandlerError'
+                    : 'Плеер не инициализирован',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: labAudioHandlerError != null ? Colors.red : Colors.grey,
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _pickTrack,
@@ -169,7 +199,9 @@ class _Lab26ScreenState extends State<Lab26Screen> {
                 ),
                 IconButton(
                   key: const Key('stop_button'),
-                  onPressed: _isPlaying || _isPaused ? _stop : null,
+                  onPressed: _hasTrack && (_isPlaying || _isPaused)
+                      ? _stop
+                      : null,
                   iconSize: 48,
                   icon: const Icon(Icons.stop),
                   color: color,
@@ -183,22 +215,18 @@ class _Lab26ScreenState extends State<Lab26Screen> {
                   final duration = _duration;
                   if (duration == null) return;
                   final position = value * duration.inMilliseconds;
-                  _player.seek(Duration(milliseconds: position.round()));
+                  labAudioHandler
+                      ?.seek(Duration(milliseconds: position.round()));
                 },
-                value: (_position != null &&
+                value: (_position.inMilliseconds > 0 &&
                         _duration != null &&
-                        _position!.inMilliseconds > 0 &&
-                        _position!.inMilliseconds < _duration!.inMilliseconds)
-                    ? _position!.inMilliseconds / _duration!.inMilliseconds
+                        _position.inMilliseconds < _duration!.inMilliseconds)
+                    ? _position.inMilliseconds / _duration!.inMilliseconds
                     : 0.0,
               ),
             ),
             Text(
-              _position != null
-                  ? '$_positionText / $_durationText'
-                  : _duration != null
-                      ? _durationText
-                      : '',
+              _hasTrack ? '$_positionText / $_durationText' : '',
               style: const TextStyle(fontSize: 16),
             ),
           ],
