@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.3'),
+      find.text('Лабораторная работа №2.4'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
     // Низ списка
-    for (final n in ['11', '2.1', '2.2', '2.3']) {
+    for (final n in ['11', '2.1', '2.2', '2.3', '2.4']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -328,6 +328,31 @@ void main() {
     await tester.pump();
     expect(find.text('Товары: 1'), findsOneWidget);
     expect(find.text('Сумма: 890.00 ₽'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2.4: Future с случайной длительностью', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.4');
+
+    expect(find.text('Нажмите на кнопку для загрузки данных.'), findsOneWidget);
+
+    await tester.tap(find.text('Загрузить данные'));
+    await tester.pump();
+    // Индикатор загрузки показывается, пока Future не завершён
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // Задача длится случайно 1–5 с — прокручиваем fake-время на максимум
+    await tester.pump(const Duration(seconds: 6));
+    expect(find.text('Данные успешно загружены!'), findsOneWidget);
+    expect(find.textContaining('Время выполнения:'), findsOneWidget);
+
+    // Повторный запуск снова показывает индикатор
+    await tester.tap(find.text('Загрузить данные'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6));
+    expect(find.text('Данные успешно загружены!'), findsOneWidget);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (
