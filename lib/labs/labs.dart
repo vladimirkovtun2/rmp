@@ -7,6 +7,8 @@ import 'lab_08/notifications_screen.dart';
 import 'lab_09/lab_09_screen.dart';
 import 'lab_10/lab_10_screen.dart';
 import 'lab_11/lab_11_screen.dart';
+import 'lab_2_1/lab_21_screen.dart';
+import 'lab_2_2/lab_22_screen.dart';
 
 /// Описание одной лабораторной работы для главного экрана.
 class LabInfo {
@@ -70,5 +72,17 @@ final List<LabInfo> labs = [
     title: 'Лабораторная работа №11',
     description: 'Поиск места на картах',
     builder: (_) => const Lab11Screen(),
+  ),
+  LabInfo(
+    number: '2.1',
+    title: 'Лабораторная работа №2.1',
+    description: 'Диалоги',
+    builder: (_) => const Lab21Screen(),
+  ),
+  LabInfo(
+    number: '2.2',
+    title: 'Лабораторная работа №2.2',
+    description: 'Виджет рабочего стола (Android)',
+    builder: (_) => const Lab22Screen(),
   ),
 ];

@@ -1,0 +1,2539 @@
+Лабораторная работа № 2.1 Диалоги и их использование для разработки мобильного приложения
+
+1 Цель работы 
+
+Получить практические навыки по созданию и настройке диалоговых окон в Android-приложениях
+
+2 Порядок выполнения работы
+
+2.1 Общие сведения о диалогах
+
+Диалоги – это всплывающие окна, которые появляются поверх основного интерфейса приложения для взаимодействия с пользователем. Они позволяют передать важную информацию, запросить подтверждение, данные или предложить выбор действий, не выводя пользователя из текущего контекста приложения.
+Основные характеристики диалогов:
+1. Всплывающее окно: диалоги временно перекрывают интерфейс приложения, фокусируя внимание пользователя на конкретной задаче или информации.
+2. Взаимодействие: они используются для получения от пользователя ответа, подтверждения или ввода данных, а также для отображения важных сообщений.
+3. Ограниченность контекста: диалоги обычно ограничены одной задачей – например, подтверждение действия, выбор даты или отображение ошибки.
+Типы диалогов:
+1. Информационные (Alert Dialog): уведомляют пользователя о важной информации или запросе подтверждения. Примером может служить подтверждение удаления объекта, сообщение об ошибке или предупреждение.
+2. Выбор даты/времени (Date/Time Picker Dialog): позволяют пользователю выбрать конкретную дату или время с помощью удобного интерфейса.
+3. Пользовательские диалоги (Custom Dialog): это диалоги, которые можно настроить под конкретные требования интерфейса приложения. Они могут включать любые пользовательские элементы управления, такие как текстовые поля, кнопки, изображения и другие компоненты.
+Цели использования диалогов:
+- Оповещение пользователя о важном событии или состоянии системы (например, успешная отправка данных).
+- Запрос подтверждения действий (например, диалог с подтверждением удаления данных).
+- Ввод данных (например, текст, даты, выбор из списка).
+- Предоставление пользователю выбора между несколькими вариантами.
+- Отображение подробной информации или инструкции.
+Диалоги играют ключевую роль в улучшении взаимодействия пользователя с приложением, делая его более интуитивным и управляемым.
+
+2.2 Работа с AlertDialogs
+
+В Flutter аналогичная функциональность для создания диалогов реализуется с помощью «showDialog». Вот как можно перевести указанный вами код для Android на Flutter:
+1. Создадим кнопку в main.dart, которая будет вызывать диалог при нажатии:
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Диалоговый пример'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            showExitDialog(context);
+          },
+          child: Text('Выйти'),
+        ),
+      ),
+    );
+  }
+}
+
+2. Теперь создадим метод `showExitDialog`, который будет отображать диалог:
+
+void showExitDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Выход'),
+        content: Text('Вы хотите сохранить данные перед   
+    выходом?'),
+        icon: Icon(Icons.info), // Иконка диалога
+        actions: [
+          TextButton(
+            child: Text('Да'),
+            onPressed: () {
+              saveData(); // Метод сохранения данных
+// Закрытие диалога
+              Navigator.of(context).pop(); 
+// Закрытие приложения 
+//(в реальных приложениях лучше так не делать)
+              // exit(0); 
+            },
+          ),
+          TextButton(
+            child: Text('Нет'),
+            onPressed: () {
+// Закрытие диалога
+              Navigator.of(context).pop(); 
+              // exit(0); // Закрытие приложения
+            },
+          ),
+          TextButton(
+            child: Text('Отмена'),
+            onPressed: () {
+// Закрытие диалога без действия
+              Navigator.of(context).pop(); 
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void saveData() {
+  // Ваш код для сохранения данных
+  print('Данные сохранены');
+}
+
+1. showDialog – это метод, который отображает диалоговое окно поверх экрана. Оно принимает «context» и «builder», который возвращает диалог.
+2. AlertDialog – это стандартный диалог в Flutter, который можно настроить с помощью заголовка («title»), содержания («content»), иконки и действий (`actions`).
+3. Кнопки в диалоге добавляются через «actions», где каждая кнопка представляет собой «TextButton». Они определяют действие, которое выполняется при нажатии.
+Этот код показывает диалог с тремя кнопками: «Да», «Нет» и «Отмена», и закрывает приложение или отменяет действие в зависимости от выбора пользователя.
+
+Рисунок 1 – Вывод диалога AlertDialog
+
+В Flutter, как и в Android, «AlertDialog» позволяет отображать различные варианты содержимого, включая списки. Давайте создадим глобальный список элементов для вывода их в диалоге и настроим диалог с обработкой нажатий на элементы.
+Сначала создадим список элементов:
+
+void showCustomDialog(BuildContext context) {
+
+List&lt;String&gt; items = ["Пункт 1", "Пункт 2", "Пункт 3"];
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Выберите элемент'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: items.map((String item) {
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+   SnackBar(content: Text('Вы выбрали: $item')),
+                  );
+                },
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text('Отмена'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Теперь в содержимом диалога будет список элементов, и нажатие на любой элемент покажет, какой элемент был выбран, и закроет диалог.
+Пояснение:
+- Мы используем виджет «AlertDialog» с заголовком и динамическим содержимым в виде списка.
+- Для каждого элемента списка создается «ListTile», который реагирует на нажатие.
+- После выбора элемента диалог закрывается с помощью «Navigator.of(context).pop()», а выбранный элемент отображается через «SnackBar».
+- Также предусмотрена кнопка «Отмена», которая закрывает диалог.
+
+Рисунок 2 – Вывод диалога AlertDialog со списком
+
+Для использования списка с единственным выбором изменим showDialog():
+
+showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState){
+            return AlertDialog(
+              title: Text('Выберите элемент'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: items.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    String item = entry.value;
+                    return RadioListTile&lt;int&gt;(
+                      title: Text(item),
+                      value: index,
+                      groupValue: checkedItem,
+                      onChanged: (int? value) {
+                        setState(() {
+                          checkedItem = value;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Отмена'),
+                  onPressed: () {
+                    setState(() {
+                      checkedItem = -1; // Сброс выбора
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Да'),
+                  onPressed: () {
+                    if (checkedItem == -1) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Выберите элемент')),
+                      );
+                    } else {
+           ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Вы выбрали: 
+         ${items[checkedItem!]}')),
+                      );
+                      setState(() {
+                        checkedItem = -1; // Сброс после выбора
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+     );
+ 
+Рисунок 3 – Вывод диалога AlertDialog со списком с выбором единственного элемента
+
+При такой реализации в содержимом диалога будет список, в котором можно будет выбрать элемент. При нажатии кнопки «Да» диалог закроется и будет выведен выбранный элемент.
+Для использования списка с множественным выбором используем следующую реализацию showDialog():
+
+showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder:(BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Выберите элементы'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: items.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    String item = entry.value;
+                    return CheckboxListTile(
+                      title: Text(item),
+                      value: checkedItems[index],
+                      onChanged: (bool? value) {
+                        setState(() {
+ // Обновляем состояние выбора элемента
+                          checkedItems[index] = value ?? false; 
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Отмена'),
+                  onPressed: () {
+                  Navigator.of(context).pop();//Закрываем диалог
+                  },
+                ),
+                TextButton(
+                  child: Text('Да'),
+                  onPressed: () {
+                    List&lt;String&gt; selectedItems = [];
+                    for (int i = 0; i &lt; checkedItems.length;                                                                                    
+                                                       i++){
+                      if (checkedItems[i]) {
+// Собираем выбранные элементы
+selectedItems.add(items[i]); 
+                      }
+                    }
+
+                    if (selectedItems.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text('Выберите хотя бы один элемент')),
+                      );
+                    } else {
+       ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text('Вы выбрали: 
+    ${selectedItems.join(', ')}')),
+                      );
+  // Закрываем диалог
+                      Navigator.of(context).pop(); 
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+ё 
+Рисунок 4 – Вывод диалога AlertDialog со списком с множественным выделением
+
+При нажатии кнопки «Да» на экран будут выведены все выделенные элементы.
+Также можно встроить собственное представление в диалог. 
+
+showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Пользовательский диалог"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Это пользовательский диалог"),
+  //Отступ между текстом и полем ввода
+                SizedBox(height: 20), 
+                Row(
+                  children: [
+                    Container(
+                      width: 100,
+                      child: Text("Введите текст:"),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: textController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Текст',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("Да"),
+              onPressed: () {
+                String userInput = textController.text;
+   // Закрываем диалог
+                Navigator.of(context).pop(); 
+                ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Вы ввели: 
+         $userInput")),
+                );
+              },
+            ),
+            TextButton(
+              child: Text("Отмена"),
+              onPressed: () {
+  // Закрываем диалог
+                Navigator.of(context).pop(); 
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+ 
+Рисунок 5 – Вывод диалога AlertDialog с кастомным представлением
+
+2.3 Работа с TimePickerDialog
+
+TimePickerDialog предоставляет пользовательский интерфейс для выбора времени, если вам нужно получить точное время от пользователя.
+Изменим showDialog() следующим образом:
+
+void showDialog(BuildContext context) async {
+// Получаем текущее время
+    TimeOfDay currentTime = TimeOfDay.now(); 
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: currentTime,
+    );
+
+    if (pickedTime != null) {
+      // Форматируем строку времени
+      String formattedTime = 
+pickedTime.hour.toString().
+padLeft(2, '0') + ':' + pickedTime.
+minute.toString().padLeft(2, '0');
+      // Выводим сообщение с выбранным временем
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Вы выбрали: $formattedTime")),
+      );
+    }}
+
+В данном примере выводится диалог с выбранным текущим временем. Пользователь может выбрать собственное время и закрыть диалог. После этого будет выведено сообщение с введенным пользователем временем. 
+
+
+Рисунок 6 – Вывод диалога TimePickerDialog
+
+2.3 Работа с DatePickerDialog
+
+DatePickerDialog предоставляет удобный способ для пользователей выбирать даты, и он широко используется в различных приложениях, где требуется работа с датами.
+Изменим метод showDialog():
+
+void showDialog (BuildContext context) async {
+// Получаем текущую дату
+    DateTime today = DateTime.now(); 
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: today,
+      firstDate: DateTime(2000), // Минимальная дата
+      lastDate: DateTime(2101),  // Максимальная дата
+    );
+
+    if (pickedDate != null) {
+      // Форматируем строку даты
+      String formattedDate = 
+"${pickedDate.day}/
+ ${pickedDate.month}/
+ ${pickedDate.year}";
+      // Выводим сообщение с выбранной датой
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Вы выбрали: 
+       $formattedDate")),
+      );
+    }
+  }
+
+При открытии диалога пользователю будет выведен календарь с выбранной сегодняшней датой. Пользователь может выбрать любую другую дату и закрыть диалог, после чего будет выведено сообщение с информацией какую дату он выбрал.
+
+
+Рисунок 7 – Вывод диалога DatePickerDialog
+
+
+
+3 Контрольные вопросы 
+
+Что понимают под диалогами в Android приложениях? 
+Какие типы диалогов вы знаете?
+Для каких целей используются диалоги?
+Какой диалог необходимо использовать, если вы хотите сообщить о чем-то пользователю или попросить его сделать выбор типа Да/Нет/Отмена?
+Какие варианты внутреннего содержимого поддерживает AlertDialog?
+Какой диалог необходимо использовать, если вам нужно получить точное время?
+Какой диалог необходимо использовать, если требуется работа с датами?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать программно все описанные виды диалогов.
+Лабораторная работа № 2.2 Использование виджетов при разработке мобильных приложений
+
+1 Цель работы 
+
+Получить практические навыки создания простейших виджетов при разработке мобильных приложений.
+
+2 Порядок выполнения работы 
+
+2.1 Общие сведения о виджетах
+
+Виджеты – это что-то наподобие мини-приложений, расположенных на рабочем столе (Home). Они позволяют просмотреть какую-либо информацию из основных приложений, либо повлиять на поведение этих приложений. В качестве примера можно привести – прогноз погоды, текущее время, баланс какого-либо счета, список сообщений в различных мессенджерах, управление состоянием WiFi/3G/GPS/Bluetooth, яркость экрана и т.д. и т.п. В этой лабораторной сделаем простейший виджет, который отобразит статичный текст и будет изменять цвет своего фона при нажатии.
+
+2.2 Создание простейшего виджета
+
+Чтобы создать приложение на Flutter, которое добавляет виджет на рабочий стол (home screen) мобильного устройства (например, Android или iOS), вам потребуется использовать нативные функции платформы для создания виджетов. На данный момент Flutter не поддерживает создание виджетов для мобильных устройств напрямую, но вы можете использовать пакет, который интегрируется с нативными кодами.
+
+ Шаги для создания виджета на Android
+
+1. Создайте новый проект Flutter:
+
+   flutter create widget_app
+   cd widget_app
+2. Добавьте необходимые зависимости:
+   
+Вам нужно добавить плагин для работы с виджетами. На данный момент популярным выбором является пакет «android_widget».
+
+   В файле «pubspec.yaml» добавьте:
+
+   dependencies:
+     flutter:
+       sdk: flutter
+     android_widget: ^0.2.
+
+   Затем выполните команду: flutter pub get
+
+3. Создайте виджет:
+   
+Теперь создайте виджет, который будет отображаться на рабочем столе. В корне проекта создайте новую папку «android» и создайте там файл «MyWidget.java» со следующим содержимым:
+
+      package com.example.widget_app;
+   import android.appwidget.AppWidgetManager;
+   import android.appwidget.AppWidgetProvider;
+   import android.content.Context;
+   import android.widget.RemoteViews;
+
+   public class MyWidget extends AppWidgetProvider {
+       @Override
+       public void onUpdate(Context context, 
+   AppWidgetManager appWidgetManager,
+   int[] appWidgetIds) {
+           for (int appWidgetId : appWidgetIds) {
+               RemoteViews views = 
+    new RemoteViews(context.getPackageName(),
+        R.layout.widget_layout);
+      // Обновление виджета, добавьте свои действия
+      appWidgetManager.updateAppWidget(appWidgetId, views);
+           }
+       }
+   }
+
+
+
+4. Создайте XML макет для виджета:
+   
+В папке «android/app/src/main/res/layout» создайте файл «widget_layout.xml»:
+
+   &lt;?xml version="1.0" encoding="utf-8"?&gt;
+   &lt;RelativeLayout 
+  xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"&gt;
+
+       &lt;TextView
+           android:id="@+id/widget_text"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Hello, Widget!"
+           android:textSize="20sp"
+           android:padding="16dp"
+    android:background="@android:color/holo_blue_light"/&gt;
+   &lt;/RelativeLayout&gt;
+
+5. Зарегистрируйте виджет в манифесте:
+   
+В файле «AndroidManifest.xml» добавьте следующий код внутри тега «&lt;application&gt;»:
+
+   &lt;receiver android:name=".MyWidget"&gt;
+       &lt;intent-filter&gt;
+           &lt;action android:name="android.appwidget.action.APPWIDGET_UPDATE" /&gt;
+       &lt;/intent-filter&gt;
+
+       &lt;meta-data
+           android:name="android.appwidget.provider"
+           android:resource="@xml/my_widget_info" /&gt;
+   &lt;/receiver&gt;
+
+6. Создайте файл конфигурации виджета:
+   
+В папке «android/app/src/main/res/xml» создайте файл «my_widget_info.xml»:
+
+   &lt;?xml version="1.0" encoding="utf-8"?&gt;
+   &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+       &lt;initialLayout&gt;@layout/widget_layout&lt;/initialLayout&gt;
+       &lt;updatePeriodMillis&gt;0&lt;/updatePeriodMillis&gt;
+       &lt;appWidgetCategory&gt;home_screen&lt;/appWidgetCategory&gt;
+   &lt;/appwidget-provider&gt;
+
+7. Запустите приложение:
+
+   После того как все настроено, запустите ваше приложение на устройстве Android. Теперь вы можете добавить виджет на рабочий стол вашего устройства Android:
+1. Нажмите и удерживайте на пустом месте рабочего стола.
+2. Выберите "Виджеты".
+3. Найдите ваш виджет и перетащите его на рабочий стол.
+Примечание
+На данный момент создание виджетов для iOS значительно сложнее и требует использования нативного кода на Swift или Objective-C. Flutter не поддерживает создание виджетов для iOS из коробки. Если вам нужно создать виджет для iOS, придется использовать комбинацию Flutter и нативного кода.
+
+
+
+
+
+
+
+
+
+
+
+
+3 Контрольные вопросы 
+
+Что такое виджет в Android? От какого класса наследуется класс «кастомного» виджета?
+Какова продолжительность времени обновления виджета на главном экране устройства и где она устанавливается?
+Как устанавливается и настраивается размер и расположение виджета на главном экране?
+
+4 Задание для самостоятельного выполнения 
+
+Создайте простейший виджет с помощью Android Studio или Visual Studio, используя предоставленные ресурсы и код.
+Измените фон виджета на любой цвет или изображение на ваш выбор.
+Лабораторная работа №2.3 – Адаптеры - инструмент для работы с данными
+
+1 Цель работы 
+
+Получить практические навыки создания собственных адаптеров при разработке мобильных приложений.
+
+2 Порядок выполнения работы 
+
+2.1 Общие сведения об адаптерах
+
+Адаптеры в Android – это важный инструмент для работы с данными и их отображения в различных виджетах, таких как списки (например, ListView, RecyclerView), спиннеры (выпадающие списки) и другие пользовательские интерфейсные элементы. Они играют критическую роль в преобразовании данных из их исходного формата в форму, пригодную для отображения пользователю. Адаптеры позволяют управлять данными и их отображением в пользовательском интерфейсе более эффективно и гибко. Они являются важной составной частью создания Android-приложений, особенно при работе с списками и другими виджетами, отображающими данные.
+В Flutter адаптер часто используется в контексте работы с различными источниками данных, например, для преобразования данных между источниками и отображения их в UI-компонентах (например, в списках). Понятие адаптера хорошо знакомо в разработке Android (например, ListAdapter, RecyclerView.Adapter), но в Flutter нет прямого аналога таких классов, так как архитектура Flutter работает несколько иначе.
+
+2.2 Создание приложения со списком с помощью ListView.builder
+
+ListView.builder в Flutter – это один из методов создания прокручиваемого списка, который позволяет динамически загружать элементы списка только тогда, когда они появляются на экране. Это оптимальный способ работы с большими списками данных, так как он не создает все элементы списка сразу, а генерирует их по мере необходимости. 
+Создание основного класса приложения:
+
+import 'package:flutter/material.dart';
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: 
+           Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const ProductListScreen(),
+    );
+  }
+}
+
+Класс MyApp отвечает за инициализацию приложения и за настройку его визуальной темы.
+Для работы с данными в приложении необходимо создать модель продукта, которая будет включать название, цену, иконку, количество товара в наличии и в корзине.
+
+class Product {
+  final String name;
+  final double price;
+  final IconData icon;
+  // Доступное количество товаров в магазине
+  int availableQuantity; 
+  int cartQuantity; // Количество товара в корзине
+
+  Product({
+    required this.name,
+    required this.price,
+    required this.icon,
+    this.availableQuantity = 10,
+    this.cartQuantity = 0,
+  });
+}
+
+Далее необходимо создать виджет, который будет отображать список доступных товаров, а также управлять их добавлением в корзину.
+
+class ProductListScreen extends StatefulWidget {
+  const ProductListScreen({super.key});
+
+  @override
+  State&lt;ProductListScreen&gt; createState() =&gt; 
+     _ProductListScreenState();
+}
+
+// Модель товара
+class Product {
+  final String name;
+  final double price;
+  final IconData icon;
+  // Доступное количество товаров в магазине
+  int availableQuantity; 
+  int cartQuantity; // Количество товара в корзине
+
+  Product({
+    required this.name,
+    required this.price,
+    required this.icon,
+    this.availableQuantity = 10,
+    this.cartQuantity = 0,
+  });
+}
+
+class _ProductListScreenState extends State&lt;ProductListScreen&gt; {
+  List&lt;Product&gt; products = [
+    Product(name: 'Пицца', price: 800.0, icon: Icons.local_pizza),
+    Product(name: 'Кофе', price: 300.0, icon: Icons.local_cafe),
+    Product(name: 'Мороженое', price: 500.0, icon: 
+    Icons.icecream),
+    Product(name: 'Фастфуд', price: 700.0, icon: Icons.fastfood),
+    Product(name: 'Напиток', price: 250.0, icon: 
+ Icons.local_drink),
+  ];
+
+  // Метод увеличения количества товара в корзине
+  void incrementCartQuantity(Product product) {
+    setState(() {
+      if (product.availableQuantity &gt; 0) {
+        product.cartQuantity += 1;
+        product.availableQuantity -= 1;
+      }
+    });
+  }
+
+  // Метод уменьшения количества товара в корзине
+  void decrementCartQuantity(Product product) {
+    setState(() {
+      if (product.cartQuantity &gt; 0) {
+        product.cartQuantity -= 1;
+        product.availableQuantity += 1;
+      }
+    });
+  }
+
+  // Подсчёт общего количества товаров в корзине
+  int getTotalCartItems() {
+    int totalItems = 0;
+    for (var product in products) {
+      totalItems += product.cartQuantity;
+    }
+    return totalItems;
+  }
+
+  // Подсчёт общей стоимости товаров в корзине
+  double getTotalCartPrice() {
+    double totalPrice = 0;
+    for (var product in products) {
+      totalPrice += product.price * product.cartQuantity;
+    }
+    return totalPrice;
+  }
+
+  // Отдельный метод для создания элемента списка товара
+  Widget buildProductItem(Product product) {
+    return ListTile(
+      leading:
+    // Иконка товара
+        Icon(product.icon, size: 40, color: Colors.blue), 
+      title: Text(product.name),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Цена: ${product.price.toStringAsFixed(2)} ₽'),
+          Text(
+              'В наличии: ${product.availableQuantity}'), 
+        ],
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Кнопка уменьшения количества товара в корзине
+          IconButton(
+            icon: const Icon(Icons.remove_circle),
+            onPressed: () =&gt; decrementCartQuantity(product),
+          ),
+          // Отображение количества товара в корзине
+          Text(product.cartQuantity.toString()),
+          // Кнопка увеличения количества товара в корзине
+          IconButton(
+            icon: const Icon(Icons.add_circle),
+            onPressed: () =&gt; incrementCartQuantity(product),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: 
+Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Товары'),
+        actions: [
+    // Отображение количества товаров и 
+// общей суммы в корзине
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Column(
+                mainAxisAlignment: 
+   MainAxisAlignment.center,
+                children: [
+                  Text('Сумма: ${getTotalCartPrice().
+toStringAsFixed(2)} ₽'),
+                  Text('Товары: ${getTotalCartItems()}'),
+                ],
+              ),
+            ),
+          ),
+          const Icon(Icons.shopping_cart),
+        ],
+      ),
+      // Вызов метода для создания элемента списка
+      body: ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return buildProductItem(
+              product); 
+        },
+      ),
+    );
+  }
+}
+
+ProductListScreen является виджетом с состоянием, что позволяет динамически изменять количество товаров и обновлять интерфейс при изменениях.
+products – список товаров с заранее заданными названиями, ценами и иконками.
+Методы incrementCartQuantity и decrementCartQuantity увеличивают или уменьшают количество товара в корзине и соответственно изменяют количество доступных товаров в магазине. Эти методы вызываются при нажатии на кнопки, предназначенные для добавления в корзину или удаления из корзины товаров.  Методы getTotalCartItems и getTotalCartPrice подсчитывают общее количество товаров и их общую стоимость на основе данных о товарах в корзине.
+buildProductItem – метод, который принимает в качестве параметра объект Product и создаёт виджет ListTile, который используется для отображения одного товара в списке с дополнительными элементами управления (кнопками для добавления и удаления товара из корзины). ListTile – это виджет, предоставляющий удобный способ отображения строки с текстом, иконкой и дополнительными элементами, такими как кнопки или чекбоксы. В данном случае он используется для представления каждого товара в списке. leading – это параметр, который определяет элемент, отображаемый в начале строки. Здесь используется виджет Icon для отображения иконки товара. title – это основной текст внутри ListTile, который отображает название товара. subtitle – это дополнительный текст под заголовком, который содержит дополнительную информацию о товаре (цена товара и доступное количество товара). trailing – это элемент, который отображается в конце строки списка (справа). В примере он используется для размещения кнопок увеличения и уменьшения количества товара в корзине, а также для отображения текущего количества товара в корзине.
+Метод build в классе _ProductListScreenState отвечает за создание пользовательского интерфейса экрана со списком товаров. Он состоит из нескольких основных компонентов: Scaffold, AppBar и ListView.builder. Scaffold – это базовый контейнер, который предоставляет структуру для экрана в приложениях на Flutter. Он автоматически добавляет такие элементы, как панель приложения (AppBar), основное содержимое экрана (body) и другие элементы (например, плавающие кнопки действий). В данном случае Scaffold состоит из двух основных частей: appBar (верхняя панель) и body (основное содержимое экрана, представленное в виде списка товаров). В данном случае AppBar содержит title (текстовое поле с названием экрана «Товары») и actions – список дополнительных элементов, которые отображаются справа на панели. В данном случае это информация о корзине и иконка корзины. ListView.builder – это виджет для отображения прокручиваемого списка элементов. В данном случае он используется для динамической генерации списка товаров, основанного на данных о продуктах из списка products. Аргумент ListView.builder itemCount задаёт количество элементов в списк, а itemBuilder это функция, которая вызывается для каждого элемента списка. Она принимает два параметра: контекст, который содержит информацию о текущем состоянии виджета и индекс текущего элемента списка. Внутри itemBuilder извлекается текущий продукт по индексу из списка products и вызывается метод buildProductItem(product), который строит интерфейс для конкретного товара (этот метод был рассмотрен выше).
+
+
+Рисунок 8 – Результат работы программы
+
+
+
+
+
+3 Контрольные вопросы 
+
+Как создать собственный адаптер (или виджет) для отображения данных в списке в Flutter?
+Как связать данные (например, список товаров) с пользовательским интерфейсом в Flutter, используя виджет, такой как ListView?
+Как переопределить метод или виджет для отображения каждого элемента в списке в Flutter (например, используя ListView.builder или ListView.separated)?
+Как обработать события, такие как клики по элементам списка, с использованием пользовательского виджета в Flutter?
+
+4 Задание для самостоятельного выполнения 
+
+Создайте собственный адаптер с помощью Android Studio, используя предоставленные ресурсы и код.
+Измените изображения, стоимость и количество товаров на ваш выбор.
+Лабораторная работа №2.4 – Future как средство выполнения фоновых задач
+
+1 Цель работы 
+
+Получить практические навыки создания простейшего приложения с использованием Future.
+
+2 Порядок выполнения работы 
+
+2.1 Общие сведения об Future
+
+В языке программирования Dart объект типа Future представляет результат асинхронной операции, которая завершится в будущем. Это одна из ключевых концепций при работе с асинхронным кодом в Dart, и она используется для выполнения операций, которые могут занять неопределённое количество времени (например, HTTP-запросы, чтение файлов и т.д.), не блокируя основной поток выполнения программы.
+Future – это объект, который содержит или будет содержать результат асинхронной операции. Операция может завершиться успехом (с возвращением данных) или с ошибкой. Когда асинхронная операция запускается, она возвращает Future, который «ожидает» завершения операции. Чтобы дождаться завершения Future и получить результат, используется ключевое слово await:
+
+Future&lt;String&gt; fetchData() async {
+  // симуляция длительной операции, например, сетевой запрос
+  await Future.delayed(Duration(seconds: 2));
+  return 'Данные загружены';
+}
+
+void main() async {
+  print('Загрузка...');
+  String result = await fetchData();
+  print(result);
+}
+
+В этом примере await приостанавливает выполнение функции до получения результата от асинхронной операции. Альтернативный способ работы с Future – это использование метода then() для обработки результата:
+
+Future&lt;String&gt; fetchData() {
+  return Future.delayed(Duration(seconds: 2), () =&gt; 'Данные 
+    загружены');
+}
+
+void main() {
+  print('Загрузка...');
+  fetchData().then((result) {
+    print(result);
+  }).catchError((error) {
+    print('Произошла ошибка: $error');
+  });
+}
+
+Ключевые слова async и await делают код асинхронных операций более читабельным и понятным, чем использование методов then, catchError для обработки асинхронных результатов.
+async – используется для пометки функции как асинхронной. Это значит, что она может содержать операции, которые будут выполняться асинхронно. Функция, объявленная как async, всегда возвращает объект типа Future, даже если возвращаемый тип явно не указан.
+await – используется для приостановки выполнения программы до тех пор, пока асинхронная операция (объект типа Future) не завершится. Когда операция завершится, выполнение продолжится с результатом этой операции.
+Чтобы обработать возможные ошибки в асинхронном коде, можно использовать блок try-catch в сочетании с await:
+
+void main() {
+  try {
+// Ожидание результата Future
+    String data = await fetchData(); 
+    print(data); // Вывод данных, когда Future завершён
+  } catch (e) {
+    print('Ошибка: $e');
+  }
+}
+
+whenComplete – метод, который вызывается после завершения, вне зависимости от того, было это успешное выполнение или ошибка.
+
+Future&lt;String&gt; fetchData() async {
+  await Future.delayed(Duration(seconds: 2));
+  return 'Данные загружены';
+}
+
+void main() async {
+  print('Загрузка...');
+
+  // Используем whenComplete для 
+  //выполнения действия после завершения
+  String result = await fetchData().whenComplete(() {
+    print('Выполнено, независимо от результата.');
+  });
+
+  print(result);
+}
+
+wait – метод, который позволяет ожидать завершения нескольких Future одновременно.
+
+Future&lt;void&gt; loadData() async {
+  await Future.wait([fetchData1(),
+  fetchData2(), fetchData3()]);
+  print('Все данные загружены');
+}
+
+Метод loadData асинхронно загружает данные из трёх источников одновременно и выводит сообщение о завершении после их загрузки.
+
+2.2 Создание простейшего приложения с использованием Future
+ 
+Код представляет собой Flutter-приложение с простым асинхронным процессом. Приложение состоит из главной страницы, которая отображает кнопку для загрузки данных, индикатор загрузки во время выполнения задачи, и сообщение с результатом после завершения загрузки.
+
+import 'package:flutter/material.dart';
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: 
+       Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const AsyncExamplePage(),
+    );
+  }
+}
+
+class AsyncExamplePage extends StatefulWidget {
+  const AsyncExamplePage({super.key});
+
+  @override
+  State&lt;AsyncExamplePage&gt; createState() =&gt; 
+ _AsyncExamplePageState();
+}
+
+class _AsyncExamplePageState extends 
+State&lt;AsyncExamplePage&gt; {
+  // Переменная для хранения данных
+  String? _data;
+  bool _isLoading = false;
+
+  // Метод для асинхронной загрузки данных
+  Future&lt;void&gt; _loadData() async {
+    setState(() {
+      _isLoading = true; // Включаем индикатор загрузки
+    });
+
+// Эмуляция запроса
+    await Future.delayed(const Duration(seconds: 3)); 
+// Устанавливаем данные
+    setState(() {
+      _data = 'Данные успешно загружены!'; 
+      _isLoading = false; // Отключаем индикатор загрузки
+    });
+  }
+
+  // Метод для отображения интерфейса 
+//в зависимости от  состояния
+  Widget _buildBody() {
+    // Показать индикатор, если идет загрузка
+    if (_isLoading) {
+      return const CircularProgressIndicator(); 
+    } else if (_data != null) {
+      return Text(
+        _data!,
+        style: const TextStyle(fontSize: 20),
+      ); // Показать текст, если данные загружены
+    } else {
+      return const Text(
+        'Нажмите на кнопку для загрузки данных.',
+        style: TextStyle(fontSize: 18),
+      ); // Сообщение перед загрузкой
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: 
+Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Асинхронный пример'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+   // Используем метод для отображения контента
+            _buildBody(), 
+            const SizedBox(height: 20), 
+            ElevatedButton(
+// Запуск асинхронной задачи
+              onPressed: _loadData, 
+              child: const Text('Загрузить данные'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Описание структуры приложения:
+main – это точка входа в приложение. Здесь вызывается метод runApp, который запускает Flutter-приложение и отображает виджет MyApp;
+MyApp – это виджет является корнем приложения;
+AsyncExamplePage – это stateful виджет (тип виджета, который может изменяться в процессе работы – в данном случае, индикатор загрузки, отображение результата), так как его состояние изменяется (например, когда данные загружаются). Виджет отслеживает, загружаются ли данные или уже загружены;
+_AsyncExamplePageState – это класс состояния для AsyncExamplePage. В нём реализована логика асинхронной загрузки данных и их отображения;
+_loadData – метод для асинхронной загрузки данных;
+_buildBody – метод для построения интерфейса. Этот метод возвращает различные виджеты в зависимости от состояния: если идёт загрузка, то отображается индикатор (CircularProgressIndicator); если данные загружены, то выводится текст с результатом; если данные ещё не загружены, то выводится инструкция;
+build – основной метод построения интерфейса. Scaffold это основной контейнер страницы, который предоставляет базовую структуру приложения с AppBar (верхняя панель) и body (контент). AppBar это панель с заголовком «Асинхронный пример». Цвет фона устанавливается через тему. Column это виджет для вертикального размещения элементов (в данном случае – текста, индикатора и кнопки). ElevatedButton это кнопка, которая запускает метод _loadData, при нажатии на неё начинается асинхронная загрузка.
+
+2.3 Запуск приложения
+
+После запуска приложения показывается кнопка для загрузки данных. После нажатия на кнопку запускается асинхронная задача, которая длится 3 секунды, и на экране показывается индикатор загрузки. Когда загрузка завершена, вместо индикатора отображается текст с результатом.
+
+Рисунок 9 – Процесс выполнения Future
+
+
+Рисунок 10 – Успешно выполненное действие
+3 Контрольные вопросы 
+
+Что такое Future в Flutter, и как он используется для работы с асинхронными операциями?
+Какие основные методы предоставляет Future, и как они используются?
+Как связать выполнение Future с обновлением пользовательского интерфейса, например, для отображения ProgressIndicator или обновления текста в TextView (Text widget в Flutter)?
+Как запустить Future при нажатии на кнопку в приложении Flutter и обработать завершение задачи для изменения состояния интерфейса?
+
+4 Задание для самостоятельного выполнения 
+
+Создайте простейшее приложение с использованием Future, используя предоставленные ресурсы и код.
+Измените код класса _AsyncExamplePageState таким образом, чтобы время выполнения фоновой задачи было случайным.
+Лабораторная работа №2.5 – Фрагменты. Использование фрагментов при разработке приложений
+
+Цель работы
+
+Получить практические навыки по созданию и использованию виджетов в Flutter – аналогах фрагментов в Android-приложениях.
+2. Порядок выполнения работы
+2.1 Общие сведения о виджетах в Flutter
+В Flutter виджеты играют ключевую роль в создании гибких и адаптивных пользовательских интерфейсов. Все элементы UI, включая текстовые поля, кнопки, изображения и контейнеры, реализованы как виджеты. Виджеты можно комбинировать и использовать многократно для построения интерфейса, который адаптируется под различные размеры экранов и ориентации устройств.
+Для создания гибких и многозадачных приложений, Flutter позволяет строить интерфейсы, используя иерархию виджетов, что похоже на фрагменты в Android. Виджеты в Flutter могут быть динамически добавлены, изменены или удалены, что позволяет создавать адаптивные приложения.
+
+2.2 Создание виджета
+
+В Flutter мы создаем виджеты в виде классов, которые расширяют класс «StatelessWidget» или «StatefulWidget» (в зависимости от того, нужен ли состоянию этого виджета).
+Для создания виджета, похожего на фрагмент, можно выполнить следующие шаги:
+1. Создайте новый файл для виджета. Например, «my_fragment.dart».
+2. Внутри этого файла определите виджет, например, «MyFragment»:
+
+
+
+import 'package:flutter/material.dart';
+
+class MyFragment extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Мой фрагмент'),
+      ),
+      body: Center(
+        child: Text('Привет, это мой фрагмент!'),
+      ),
+    );
+  }
+}
+
+Этот виджет создаст экран с текстом «Привет, это мой фрагмент!» и заголовком "Мой фрагмент".
+
+2.3 Использование виджета в главной активности
+
+В Flutter все приложение начинается с виджета, который обычно называется «MaterialApp» или «CupertinoApp». Чтобы добавить созданный виджет в главный экран (аналог активности в Android), выполните следующие шаги:
+1. Откройте файл «main.dart», который является точкой входа в приложение.
+2. В «main.dart» добавьте «MyFragment» в качестве экрана:
+
+import 'package:flutter/material.dart';
+import 'my_fragment.dart'; // Импортируем файл с фрагментом
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+ // Используем наш фрагмент как главный экран
+      home: MyFragment(), 
+    );
+  }
+}
+
+Теперь при запуске приложения будет отображен виджет `MyFragment` с текстом «Привет, это мой фрагмент!».
+
+3. Объяснение работы кода
+
+- «MyFragment» – это виджет, который используется в качестве экрана в приложении.
+- «MaterialApp» – это контейнер для всего приложения, который предоставляет стили и функциональность, такие как тема и навигация.
+- В «MyApp» в методе «build» указано, что домашний экран будет «MyFragment».
+
+4. Результат
+
+После выполнения указанных шагов приложение отобразит экран с текстом «Привет, это мой фрагмент!» при запуске.
+
+Рисунок 11 – Отображение фрагмента
+
+Такой подход в Flutter позволяет создавать гибкие, многократно используемые компоненты интерфейса, аналогичные фрагментам в Android, используя виджеты.
+
+
+
+3 Контрольные вопросы 
+
+1.Что такое фрагменты в Flutter приложении? 
+2.Какую роль выполняют Фрагменты в создании пользовательских интерфейсов в мобильных приложениях?
+3.Какие действия необходимо выполнить по созданию фрагмента?
+4.Сколько фрагментов может быть в мобильном приложении?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать программно создание и использование фрагментов.
+Лабораторная работа №2.6 – Работа с мультимедиа, воспроизведение аудио и видео на мобильных устройствах
+
+1 Цель работы 
+
+Получить практические навыки по работе с мультимедиа в Android-приложениях.
+
+2 Порядок выполнения работы
+
+2.1 Общие сведения о медиа
+
+Работа с мультимедиа во Flutter также включает воспроизведение аудио, видео и отображение изображений на мобильных устройствах, а также взаимодействие с мультимедийными ресурсами. 
+Flutter поддерживает различные медиаформаты, включая аудио (например, MP3, AAC) и видео (например, MP4, H.264). Вы можете встраивать медиафайлы в приложение в виде ресурсов или загружать их извне – с сервера или из локального хранилища устройства.
+Для воспроизведения аудио и видео можно использовать пакеты «audioplayers» (для аудио) и «video_player» (для видео). Эти пакеты предоставляют управление воспроизведением, паузой, остановкой и сменой источников медиаданных.
+Во Flutter также можно управлять аудиофокусом с помощью пакета «audio_session», который позволяет обрабатывать приоритеты аудио между приложениями, предотвращая конфликты воспроизведения.
+
+2.2 Создание дизайна медиаплеера
+
+Первым делом определим шаблон активности планируемого медиаплеера:
+
+Widget build(BuildContext context) {
+    final color = Theme.of(context).primaryColor;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: &lt;Widget&gt;[
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Shaman - Я Русский"),
+            IconButton(
+              key: const Key('play_button'),
+              onPressed: _isPlaying ? null : _play,
+              iconSize: 48.0,
+              icon: const Icon(Icons.play_arrow),
+              color: color,
+            ),
+            IconButton(
+              key: const Key('pause_button'),
+              onPressed: _isPlaying ? _pause : null,
+              iconSize: 48.0,
+              icon: const Icon(Icons.pause),
+              color: color,
+            ),
+            IconButton(
+              key: const Key('stop_button'),
+              onPressed: _isPlaying || _isPaused ? _stop : null,
+              iconSize: 48.0,
+              icon: const Icon(Icons.stop),
+              color: color,
+            ),
+          ],
+        ),
+        Slider(
+          onChanged: (value) {
+            final duration = _duration;
+            if (duration == null) {
+              return;
+            }
+            final position = value * duration.inMilliseconds;
+            player.seek(Duration(milliseconds: 
+      position.round()));
+          },
+          value: (_position != null &amp;&amp;
+                  _duration != null &amp;&amp;
+                  _position!.inMilliseconds &gt; 0 &amp;&amp;
+                  _position!.inMilliseconds &lt; 
+   _duration!.inMilliseconds) ? 
+                 _position!.inMilliseconds / 
+                 _duration!.inMilliseconds: 0.0,
+        ),
+        Text(
+          _position != null
+              ? '$_positionText / $_durationText'
+              : _duration != null
+                  ? _durationText
+                  : '',
+          style: const TextStyle(fontSize: 16.0),
+        ),
+      ],
+    );
+  }
+
+Для управления воспроизведением будем использовать кнопки паузы/воспроизведения, ползунок для работы с позицией воспроизведения и собственный список воспроизведения.
+
+2.3 Разработка логики воспроизведения
+
+void _initStreams() {
+    _durationSubscription = 
+   player.onDurationChanged.
+        listen((duration) {
+      setState(() =&gt; _duration = duration);
+    });
+
+    _positionSubscription = player.onPositionChanged.listen(
+      (p) =&gt; setState(() =&gt; _position = p),
+    );
+
+    _playerCompleteSubscription = 
+player.onPlayerComplete.
+listen((event) {
+      setState(() {
+        _playerState = PlayerState.stopped;
+        _position = Duration.zero;
+      });
+    });
+
+    _playerStateChangeSubscription =
+        player.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _playerState = state;
+      });
+    });
+  }
+
+  Future&lt;void&gt; _play() async {
+    await player.resume();
+    setState(() =&gt; _playerState = PlayerState.playing);
+  }
+
+  Future&lt;void&gt; _pause() async {
+    await player.pause();
+    setState(() =&gt; _playerState = PlayerState.paused);
+  }
+
+  Future&lt;void&gt; _stop() async {
+    await player.stop();
+    setState(() {
+      _playerState = PlayerState.stopped;
+      _position = Duration.zero;
+    });
+  }
+}
+
+Этот код представляет собой часть реализации аудиоплеера в Flutter/Dart. Он использует подписки на различные события, такие как изменение продолжительности, позиции и состояния воспроизведения. Функции «_play», «_pause» и «_stop» управляют воспроизведением аудиоплеера, меняя его состояние и обновляя пользовательский интерфейс.
+
+ Описание функций и подписок:
+
+1. _initStreams – инициализирует потоки событий и подписки на них:
+   - _durationSubscription – подписка на изменения продолжительности аудио («onDurationChanged»). Когда продолжительность изменяется, обновляется переменная «_duration».
+   - _positionSubscription – подписка на изменения позиции воспроизведения («onPositionChanged»). При изменении позиции обновляется переменная «_position».
+   - _playerCompleteSubscription – подписка на событие завершения воспроизведения («onPlayerComplete»). Когда воспроизведение заканчивается, состояние плеера изменяется на «stopped», а позиция сбрасывается на ноль.
+   - _playerStateChangeSubscription – подписка на изменения состояния плеера («onPlayerStateChanged»). При изменении состояния обновляется переменная «_playerState».
+2. _play – запускает воспроизведение аудио, вызывая метод «resume» у объекта «player». После этого обновляется состояние плеера на «playing».
+3. _pause – ставит воспроизведение на паузу, вызывая метод «pause». Состояние обновляется на «paused».
+4. _stop – останавливает воспроизведение, вызывая метод «stop». После остановки состояние меняется на «stopped», а позиция сбрасывается на ноль.
+
+2.4 Разработка собственного адаптера для воспроизведения
+
+Класс адаптера будет выглядеть следующим образом:
+
+PlayerState? _playerState;
+  Duration? _duration;
+  Duration? _position;
+
+  StreamSubscription? _durationSubscription;
+  StreamSubscription? _positionSubscription;
+  StreamSubscription? _playerCompleteSubscription;
+  StreamSubscription? _playerStateChangeSubscription;
+
+  bool get _isPlaying =&gt; _playerState == PlayerState.playing;
+
+  bool get _isPaused =&gt; _playerState == PlayerState.paused;
+
+  String get _durationText =&gt; _duration?.toString().
+      split('.').first ?? '';
+
+  String get _positionText =&gt; _position?.toString().
+ split('.').first ?? '';
+
+  AudioPlayer get player =&gt; widget.player;
+
+  @override
+  void initState() {
+    super.initState();
+    // Use initial values from player
+    _playerState = player.state;
+    player.getDuration().then(
+          (value) =&gt; setState(() {
+            _duration = value;
+          }),
+        );
+    player.getCurrentPosition().then(
+          (value) =&gt; setState(() {
+            _position = value;
+          }),
+        );
+    _initStreams();
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    // Subscriptions only can be closed asynchronously,
+    // therefore events can occur 
+//after widget has been disposed.
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    _durationSubscription?.cancel();
+    _positionSubscription?.cancel();
+    _playerCompleteSubscription?.cancel();
+    _playerStateChangeSubscription?.cancel();
+    super.dispose();
+  }
+
+
+Рисунок 12 – Интерфейс плеера
+
+
+
+
+
+3 Контрольные вопросы 
+
+1.Что включает в себя работа с мультимедиа в Flutter приложении? 
+2.Какой класс Flutter предоставляет для воспроизведения аудио и видео в мобильных приложениях?
+3.Какие методы реализуют основную логику работы с мультимедиа?
+4.Какой механизм в операционной системе Flutter управляет взаимодействием компонентов приложения с аудиосистемой?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать приведенный в примере плеер.
+Лабораторная работа №2.7 – Работа с файлами
+
+1 Цель работы 
+
+Освоить навыки эффективной работы с файлами в мобильных приложениях с помощью фреймворка Flutter, включая чтение, запись, и удаление данных, а также применение соответствующих операций обработки ошибок.
+
+2 Порядок выполнения работы
+
+2.1 Общие сведения
+
+Работа с файлами в контексте мобильной разработки означает управление хранимыми данными, включая чтение, запись и удаление файлов на устройстве. Эта функциональность позволяет приложениям сохранять информацию на постоянной основе, обмениваться данными между пользователями, а также поддерживать различные медиафайлы, настройки и другие важные ресурсы. Применительно к мобильным приложениям на платформе Android, это также может включать в себя доступ к внешним хранилищам, работу с базами данных, управление кэшем и многое другое.
+
+2.2 Создание класса для работы с файлами
+
+Откройте файл pubspec.yaml и добавьте зависимость file_picker для работы с файлами.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  file_picker: ^8.1.4
+
+В файл lib/main.dart добавим следующий код:
+
+import 'package:files_picker/src/file_picker_example.dart';
+import 'package:flutter/material.dart';
+
+void main() =&gt; runApp(
+  FilePickerDemo()
+);
+
+Прежде всего потребуется создать класс, который будет использоваться для работы с файлами. Создадим новый класс lib/src/file_picker_example.dart.
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class FilePickerDemo extends StatefulWidget {
+  @override
+  _FilePickerDemoState createState() =&gt;  _FilePickerDemoState();
+}
+
+class _FilePickerDemoState extends State&lt;FilePickerDemo&gt; {
+  final GlobalKey&lt;ScaffoldState&gt; _scaffoldKey = 
+         GlobalKey&lt;ScaffoldState&gt;();
+  final _scaffoldMessengerKey = 
+     GlobalKey&lt;ScaffoldMessengerState&gt;();
+  final _defaultFileNameController = 
+           TextEditingController();
+  final _dialogTitleController = TextEditingController();
+  final _initialDirectoryController = TextEditingController();
+  final _fileExtensionController = TextEditingController();
+  String? _fileName;
+  String? _saveAsFileName;
+  List&lt;PlatformFile&gt;? _paths;
+  String? _directoryPath;
+  String? _extension;
+  bool _isLoading = false;
+  bool _lockParentWindow = false;
+  bool _userAborted = false;
+  bool _multiPick = false;
+  FileType _pickingType = FileType.any;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileExtensionController
+        .addListener(() =&gt; _extension = 
+     _fileExtensionController.text);
+  }
+
+  void _pickFiles() async {
+    _resetState();
+    try {
+      _directoryPath = null;
+      _paths = (await FilePicker.platform.pickFiles(
+        compressionQuality: 30,
+        type: _pickingType,
+        allowMultiple: _multiPick,
+        onFileLoading: (FilePickerStatus status) =&gt; 
+ print(status),
+        allowedExtensions: 
+   (_extension?.isNotEmpty ??  false)
+            ? _extension?.replaceAll(' ', '').split(',')
+            : null,
+        dialogTitle: _dialogTitleController.text,
+        initialDirectory: _initialDirectoryController.text,
+        lockParentWindow: _lockParentWindow,
+      ))
+          ?.files;
+    } on PlatformException catch (e) {
+      _logException('Unsupported operation'+e.toString());
+    } catch (e) {
+      _logException(e.toString());
+    }
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      _fileName =
+          _paths != null ? _paths!.map((e) =&gt; 
+   e.name).toString() : '...';
+      _userAborted = _paths == null;
+    });
+  }
+
+  void _clearCachedFiles() async {
+    _resetState();
+    try {
+      bool? result = await FilePicker.platform.
+   clearTemporaryFiles();
+      _scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+      _scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            (result!
+                ? 'Temporary files removed with success.'
+                : 'Failed to clean temporary files'),
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    } on PlatformException catch (e) {
+      _logException('Unsupported operation'+e.toString());
+    } catch (e) {
+      _logException(e.toString());
+    } finally {
+      setState(() =&gt; _isLoading = false);
+    }
+  }
+
+  void _selectFolder() async {
+    _resetState();
+    try {
+      String? path = await FilePicker.platform.
+    getDirectoryPath(
+        dialogTitle: _dialogTitleController.text,
+        initialDirectory: _initialDirectoryController.text,
+        lockParentWindow: _lockParentWindow,
+      );
+      setState(() {
+        _directoryPath = path;
+        _userAborted = path == null;
+      });
+    } on PlatformException catch (e) {
+      _logException('Unsupported operation'+e.toString());
+    } catch (e) {
+      _logException(e.toString());
+    } finally {
+      setState(() =&gt; _isLoading = false);
+    }
+  }
+
+  Future&lt;void&gt; _saveFile() async {
+    _resetState();
+    try {
+      String? fileName = await FilePicker.platform.saveFile(
+        allowedExtensions: 
+      (_extension?.isNotEmpty ?? false)
+            ? _extension?.replaceAll(' ', '').split(',')
+            : null,
+        type: _pickingType,
+        dialogTitle: _dialogTitleController.text,
+        fileName: _defaultFileNameController.text,
+        initialDirectory: _initialDirectoryController.text,
+        lockParentWindow: _lockParentWindow,
+      );
+      setState(() {
+        _saveAsFileName = fileName;
+        _userAborted = fileName == null;
+      });
+    } on PlatformException catch (e) {
+      _logException('Unsupported operation'+e.toString());
+    } catch (e) {
+      _logException(e.toString());
+    } finally {
+      setState(() =&gt; _isLoading = false);
+    }
+  }
+
+  void _logException(String message) {
+    print(message);
+    _scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _resetState() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+      _directoryPath = null;
+      _fileName = null;
+      _paths = null;
+      _saveAsFileName = null;
+      _userAborted = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: _scaffoldMessengerKey,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Colors.deepPurple,
+        ),
+      ),
+      home: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: const Text('File Picker example app'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(left: 15.0,
+    right: 15.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: &lt;Widget&gt;[
+                const Text(
+                  'Configuration',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                Wrap(
+                  spacing: 10.0,
+                  runSpacing: 10.0,
+                  children: [
+                    SizedBox(
+                      width: 400,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Dialog Title',
+                        ),
+                        controller: _dialogTitleController,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 400,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Initial Directory',
+                        ),
+                        controller: _initialDirectoryController,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 400,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Default File Name',
+                        ),
+                        controller: _defaultFileNameController,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 400,
+                      child: DropdownButtonFormField&lt;FileType&gt;(
+                        value: _pickingType,
+                        icon: const Icon(Icons.expand_more),
+                        alignment: Alignment.centerLeft,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        items: FileType.values
+                            .map(
+                              (fileType) =&gt; 
+   DropdownMenuItem&lt;FileType&gt;(
+                                child:Text(fileType.toString()),
+                                value: fileType,
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) =&gt; setState(
+                          () {
+                            _pickingType = value!;
+                           if (_pickingType != FileType.custom){
+                              _fileExtensionController.text = 
+    _extension = '';
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    _pickingType == FileType.custom
+                        ? SizedBox(
+                            width: 400,
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'File Extension',
+                                  hintText: 'jpg, png, gif'),
+                              autovalidateMode: 
+ AutovalidateMode.always,
+                              controller: 
+_fileExtensionController,
+                              keyboardType: TextInputType.text,
+                              maxLength: 15,
+                            ),
+                          )
+                        : const SizedBox(),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.start,
+                  runAlignment: WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  direction: Axis.horizontal,
+                  spacing: 10.0,
+                  runSpacing: 10.0,
+                  children: [
+                    SizedBox(
+                      width: 400.0,
+                      child: SwitchListTile.adaptive(
+                        title: const Text(
+                          'Lock parent window',
+                          textAlign: TextAlign.left,
+                        ),
+                        onChanged: (bool value) =&gt;
+                            setState(() =&gt; _lockParentWindow = 
+   value),
+                        value: _lockParentWindow,
+                      ),
+                    ),
+                    ConstrainedBox(
+                      constraints: const 
+       BoxConstraints.tightFor(width: 400.0),
+                      child: SwitchListTile.adaptive(
+                        title: const Text(
+                          'Pick multiple files',
+                          textAlign: TextAlign.left,
+                        ),
+                        onChanged: (bool value) =&gt;
+                            setState(() =&gt; _multiPick = value),
+                        value: _multiPick,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                const Divider(),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                const Text(
+                  'Actions',
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0, 
+     bottom: 20.0),
+                  child: Wrap(
+                    spacing: 10.0,
+                    runSpacing: 10.0,
+                    children: &lt;Widget&gt;[
+                      SizedBox(
+                        width: 120,
+                        child: FloatingActionButton.extended(
+                            onPressed: () =&gt; _pickFiles(),
+                            label:
+                                Text(_multiPick ? 
+   'Pick files' : 
+   'Pick file'),
+                           icon: const Icon(Icons.description)),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: FloatingActionButton.extended(
+                          onPressed: () =&gt; _selectFolder(),
+                          label: const Text('Pick folder'),
+                          icon: const Icon(Icons.folder),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: FloatingActionButton.extended(
+                          onPressed: () =&gt; _saveFile(),
+                          label: const Text('Save file'),
+                          icon: const Icon(Icons.save_as),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        child: FloatingActionButton.extended(
+                          onPressed: () =&gt; _clearCachedFiles(),
+                          label: const Text('Clear temporary 
+  files'),
+                         icon: const Icon(Icons.delete_forever),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                const Text(
+                  'File Picker Result',
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                Builder(
+                  builder: (BuildContext context) =&gt; _isLoading
+                      ? const Row(
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 40.0,
+                                  ),
+                                  child: 
+ CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : _userAborted
+                          ? const Row(
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 300,
+                                      child: ListTile(
+                                        leading: Icon(
+                                          Icons.error_outline,
+                                        ),
+                                        contentPadding: 
+    EdgeInsets.symmetric(
+                                            vertical: 40.0),
+                                        title: Text(
+                                          'User has aborted the 
+  dialog',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : _directoryPath != null
+                              ? ListTile(
+                                  title: const Text('Directory 
+   path'),
+                                  subtitle: 
+        Text(_directoryPath!),
+                                )
+                              : _paths != null
+                                  ? Container(
+                                      padding: const 
+    EdgeInsets.symmetric(
+                                        vertical: 20.0,
+                                      ),
+                                      height:
+   MediaQuery.of(context).size.
+height * 0.50,
+                                      child: Scrollbar(
+                                          child: 
+ ListView.separated(
+                                        itemCount:
+                                            _paths != null &amp;&amp; 
+_paths!.isNotEmpty
+                                                ? _paths!.length
+                                                : 1,
+                                        itemBuilder:
+                                            (BuildContext 
+  context, int index) {
+                                         final bool isMultiPath=
+                                               _paths != null &amp;&amp;
+ _paths!.isNotEmpty;
+                                          final String name =
+                                              'File $index: 
+ ${isMultiPath ? _paths!.map((e) =&gt; 
+ e.name).toList()[index] : 
+ _fileName ?? '...'}';
+                                          final path = kIsWeb
+                                              ? null
+                                              : _paths!
+                                                  .map((e) =&gt; 
+e.path).toList()[index].
+                                       toString();
+
+                                          return ListTile(
+                                            title: Text(
+                                              name,
+                                            ),
+                                            subtitle: 
+   Text(path ?? ''),
+                                          );
+                                        },
+                                        separatorBuilder:
+                                          (BuildContext context, 
+    int index) =&gt;
+                                                const Divider(),
+                                      )),
+                                    )
+                                  : _saveAsFileName != null
+                                      ? ListTile(
+                                          title: const 
+  Text('Save file'),
+                                          subtitle: 
+  Text(_saveAsFileName!),
+                                        )
+                                      : const SizedBox(),
+                ),
+                const SizedBox(
+                  height: 40.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Разберем каждый метод этого класса.
+Метод initState():
+Описание: этот метод вызывается при инициализации состояния виджета. В нем настраивается слушатель для текстового контроллера _fileExtensionController, чтобы отслеживать изменения текста в поле ввода расширений файлов. Это позволяет обновлять переменную _extension, которая хранит расширение выбранного файла.
+Метод _pickFiles():
+Описание: этот метод открывает диалоговое окно для выбора файлов. В нем устанавливаются различные параметры выбора файлов, такие как возможность выбора нескольких файлов, тип файлов (например, изображений, документов и т.д.), начальная директория и заголовок окна диалога. После того как пользователь выбрал файлы, информация о файлах сохраняется, и интерфейс обновляется с отображением выбранных файлов.
+Параметры:
+compressionQuality: (опционально) Качество сжатия файлов, по умолчанию установлено на 30. Это влияет на размер выбранных файлов;
+type: Тип выбираемых файлов (например, FileType.image, FileType.any). Это указывает, какие файлы могут быть выбраны;
+allowMultiple: Логическое значение, которое указывает, разрешено ли выбирать несколько файлов. Если значение true, можно выбрать несколько файлов, иначе – только один;
+onFileLoading: Колбэк, который вызывается при загрузке файлов. Он может использоваться для отображения состояния загрузки;
+allowedExtensions: (опционально) Список разрешенных расширений файлов, которые могут быть выбраны (например, ['jpg', 'png']).
+dialogTitle: Заголовок диалогового окна;
+initialDirectory: Начальная директория, в которой откроется диалог;
+lockParentWindow: Логическое значение, указывающее, блокируется ли родительское окно во время выбора файла.
+Метод _clearCachedFiles():
+Описание: этот метод очищает кэш временных файлов, связанных с операциями выбора файлов. Он вызывает метод clearTemporaryFiles() из пакета file_picker, который удаляет временные файлы, созданные при предыдущих выборах. После выполнения операции в интерфейсе показывается уведомление (Snackbar) с результатом – успешно или неудачно.
+Метод selectFolder():
+Описание: этот метод открывает диалоговое окно для выбора папки. Когда пользователь выбирает папку, путь к ней сохраняется в переменной _directoryPath, и отображается в интерфейсе. Если пользователь отменяет выбор, устанавливается флаг _userAborted, и в интерфейсе показывается соответствующее сообщение.
+Параметры:
+dialogTitle: Заголовок диалога выбора папки;
+initialDirectory: Начальная директория, в которой откроется диалог выбора папки;
+lockParentWindow: Логическое значение, указывающее, блокируется ли родительское окно во время выбора папки.
+Метод _saveFile():
+Описание: этот метод открывает диалоговое окно для сохранения файла. Пользователь может выбрать место для сохранения и задать имя файла. Когда пользователь сохраняет файл, его путь и имя сохраняются в переменной _saveAsFileName, и обновляется интерфейс, чтобы показать информацию о сохраненном файле.
+Параметры:
+allowedExtensions: (опционально) Список разрешенных расширений файлов для сохранения, например, ['jpg', 'png'];
+type: Тип файла, который можно сохранить (например, FileType.image);
+dialogTitle: Заголовок диалога для сохранения файла;
+fileName: Имя файла по умолчанию, которое будет предложено пользователю;
+initialDirectory: Начальная директория, в которой откроется диалог для сохранения файла;
+lockParentWindow: Логическое значение, указывающее, блокируется ли родительское окно во время сохранения файла.
+Метод logException(String message):
+Описание: этот метод логирует исключения и ошибки. Если в процессе выполнения возникает ошибка, она выводится в консоль и отображается в интерфейсе через уведомление (Snackbar) с сообщением об ошибке.
+Метод _resetState():
+Описание: этот метод сбрасывает все состояния, связанные с операциями выбора файлов или папок. После его вызова очищаются все переменные, которые содержат информацию о выбранных файлах, пути и имени файла. Также включает индикатор загрузки, который сигнализирует, что система готова к следующей операции.
+Методы класса FilePickerDemo используются для работы с файловой системой, позволяя пользователю выбирать файлы, папки, а также сохранять файлы на устройстве. Каждый метод отвечает за конкретную операцию (например, выбор файла, очистка кэша или сохранение файла), и в зависимости от результата взаимодействия с пользователем обновляет состояние и интерфейс приложения.
+Описание полей класса FilePickerDemo:
+_scaffoldKey: глобальный ключ для управления состоянием Scaffold, используемого для отображения основного экрана с возможностью показывать Snackbar и другие элементы UI;
+_scaffoldMessengerKey: глобальный ключ для управления состоянием ScaffoldMessenger, который используется для отображения Snackbar (уведомлений) с информацией о статусе операции;
+_defaultFileNameController: контроллер для текстового поля, которое позволяет пользователю задать имя файла, предложенное при сохранении;
+_dialogTitleController: контроллер для текстового поля, в котором можно ввести заголовок для диалогового окна (например, «Выберите файл») ;
+_initialDirectoryController: контроллер для текстового поля, позволяющего пользователю задать начальную директорию при открытии диалогового окна;
+_fileExtensionController: контроллер для текстового поля, в котором указываются допустимые расширения файлов, которые можно выбрать в диалоге (например, "jpg, png");
+_fileName: строка, в которой хранится имя выбранного файла;
+_saveAsFileName: строка, в которой хранится имя и путь файла, выбранного для сохранения;
+_paths: список файлов (тип PlatformFile), выбранных пользователем в диалоге;
+_directoryPath: строка, хранящая путь к выбранной пользователем папке;
+_extension: строка, указывающая на расширения файлов, которые могут быть выбраны (например, «jpg», «png») ;
+_isLoading: логическое значение, указывающее, выполняется ли в данный момент операция выбора файла или папки;
+_lockParentWindow: логическое значение, указывающее, следует ли блокировать родительское окно при открытии диалога выбора файла или папки;
+_userAborted: логическое значение, которое показывает, отменил ли пользователь операцию выбора файла или папки;
+_multiPick: логическое значение, указывающее, разрешено ли пользователю выбирать несколько файлов;
+_pickingType: тип файлов, которые могут быть выбраны пользователем (например, любые файлы, изображения, видео и т.д.).
+
+
+2.3 Дизайн пользовательского интерфейса
+
+Описание пользовательского интерфейса в классе FilePickerDemo:
+Основной экран (Scaffold)
+Экран приложения состоит из Scaffold, который является основным контейнером и включает в себя элементы такие как:
+AppBar с названием приложения «File Picker example app»;
+Body, который включает форму с полями конфигурации и кнопки для выбора файлов, папок и очистки временных файлов.
+Конфигурация (Configuration)
+В этой секции пользователь может настроить параметры, которые будут использоваться при выборе файлов или папок:
+TextFields:
+Dialog Title: поле для ввода заголовка диалогового окна (например, «Выберите файл»);
+Initial Directory: поле для ввода начальной директории, в которой будет открываться диалог выбора;
+Default File Name: поле для задания имени файла, которое будет предложено пользователю при сохранении.
+DropdownButtonFormField. FileType: выпадающий список, позволяющий выбрать тип файлов (например, любые файлы, изображения, текстовые файлы и т.д.). При выборе типа «custom» открывается дополнительное текстовое поле для ввода допустимых расширений файлов.
+TextFormField (Custom Extension): если выбран тип «custom», появляется поле для ввода расширений файлов (например, «jpg, png»).
+SwitchListTile:
+Lock Parent Window: переключатель, который позволяет заблокировать родительское окно при открытии диалога;
+Pick Multiple Files: переключатель, который разрешает или запрещает выбор нескольких файлов.
+Действия (Actions)
+Секция с кнопками для выполнения различных действий:
+Pick Files / Pick File: кнопка для выбора файлов. Если разрешен выбор нескольких файлов, текст на кнопке меняется на «Pick files» ;
+Pick Folder: кнопка для выбора папки;
+Save File: кнопка для сохранения файла, которая позволяет пользователю указать место и имя файла для сохранения;
+Clear Temporary Files: кнопка для очистки временных файлов, хранящихся в кеше.
+Результат выбора файла или папки (File Picker Result)
+В этой секции отображается результат действия, выполненного пользователем. Если процесс выбора файла или папки еще не завершен, отображается индикатор загрузки (CircularProgressIndicator). Если пользователь отменил выбор, выводится сообщение об этом: «User has aborted the dialog». Если выбран файл или папка, выводится информация о выбранном файле (имя, путь) или директории:
+Для выбранных файлов: список с именами файлов и их путями;
+Для выбранной папки: отображается путь к директории.
+Если был выбран файл для сохранения, отображается имя и путь сохраненного файла.
+В целом, UI разделен на несколько блоков для удобства пользователя, каждый из которых отвечает за отдельный функционал, такой как настройка параметров, выполнение действий и отображение результатов.
+
+2.4 Запуск приложения
+
+Когда пользователь откроет приложение, он увидит экран с настройками выбора файлов, где можно указать параметры, такие как название диалогового окна, начальную директорию, имя файла по умолчанию и типы файлов для выбора. Также будут доступны переключатели для включения многократного выбора файлов и блокировки основного окна.
+Внизу экрана находятся кнопки для выполнения действий – выбор файлов, выбор папки, сохранение файла и очистка временных файлов. После выбора файла или папки на экране отобразится результа – список выбранных файлов, путь к папке или сообщение об ошибке, если пользователь отменил действие. В процессе загрузки показывается индикатор прогресса.
+
+
+Рисунок 13 – Главное окно приложения
+
+
+Рисунок 14 – Сохранение файла
+
+
+
+
+Рисунок 15 – Загрузка данных с файла
+
+
+
+
+
+
+
+
+
+
+
+
+3 Контрольные вопросы 
+
+1.Возможна ли работа с файлами в Android приложении? 
+2.Какие методы должны быть в классе для работы с файлами?
+3.Какие действия необходимо выполнить по созданию интерфейса работы с файлами?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать программу, взаимодействующую с файлами аналогично примеру.
+Лабораторная работа №2.8 – Работа с базами данных SQLite
+
+1 Цель работы 
+
+Получить практические навыки по работе с базами данных с помощью SQLite в Android-приложениях.
+
+2 Порядок выполнения работы
+
+2.1 Общие сведения о SQLite
+
+SQLite – это встроенная система управления базами данных, которая широко используется в разработке приложений для Android. Она предоставляет легковесное и эффективное средство для работы с данными в приложениях для мобильных устройств.
+Использование SQLite в Android – это важная часть разработки мобильных приложений, так как это позволяет хранить и управлять данными, необходимыми для приложения.
+
+2.2 Работа с SQLite.
+
+Откройте файл pubspec.yaml и добавьте зависимость sqflite для работы с SQLite, а также path для указания пути к базе данных.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.0.0+4
+  path: ^1.8.0
+
+Теперь создадим файл для работы с SQLite. В проекте создадим файл lib/db_service.dart, в котором будет реализована вся логика работы с базой данных.
+
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+
+class DBService {
+  static final DBService _instance = DBService._internal();
+  factory DBService() =&gt; _instance;
+
+  DBService._internal();
+
+  Database? _database;
+
+  Future&lt;Database&gt; get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  Future&lt;Database&gt; _initDatabase() async {
+    String path = join(await getDatabasesPath(), 'MyDatabase.db');
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute(
+          'CREATE TABLE IF NOT EXISTS MyTable (
+   id INTEGER PRIMARY KEY AUTOINCREMENT, 
+   name TEXT)',
+        );
+      },
+    );
+  }
+
+  // Добавление новой записи
+  Future&lt;int&gt; addRecord(String name) async {
+    final db = await database;
+    return await db.insert(
+      'MyTable',
+      {'name': name},
+    );
+  }
+
+// Обновление записи
+  Future&lt;void&gt; updateRecord(int id, String newName) async {
+    final db = await database;
+    await db.update(
+      'MyTable',
+      {'name': newName},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Удаление записи
+  Future&lt;int&gt; deleteRecord(int id) async {
+    final db = await database;
+    return await db.delete(
+      'MyTable',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+// Выборка всех записей без сортировки
+  Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; getAllRecords() async {
+    final db = await database;
+    return await db.query('MyTable');
+  }
+
+// Выборка с сортировкой по имени
+  Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; getSortedRecords() async {
+    final db = await database;
+    return await db.query(
+      'MyTable',
+      orderBy: 'name DESC', // Сортировка по убыванию
+    );
+  }
+}
+
+Описание:
+getAllRecords: Этот метод возвращает все записи из таблицы MyTable, без применения сортировки. database: Это асинхронная переменная, которая возвращает экземпляр базы данных, либо создаёт новый, если он не существует. db.query('MyTable'): Это SQL запрос, который извлекает все записи из таблицы MyTable без сортировки. Метод query возвращает результат в виде списка карт (List of Map), где каждая карта представляет собой строку из таблицы, а ключи карты – это имена столбцов. 
+getSortedRecords: этот метод возвращает все записи из таблицы MyTable, отсортированные по полю name по убыванию. db.query('MyTable', orderBy: 'name DESC'): В этом запросе мы добавляем параметр orderBy: 'name DESC', который указывает на то, что записи должны быть отсортированы по столбцу name в порядке убывания (по убыванию). name DESC означает "по убыванию". Если бы мы использовали ASC (по возрастанию), результат был бы отсортирован по имени от А до Я.
+addRecord: Этот метод добавляет новую запись в таблицу MyTable с именем, которое передается как параметр. db.insert('MyTable', {'name': name}): Этот метод вставляет новую запись в таблицу MyTable. Мы передаем карту, где ключом является name, а значением – переданное имя, которое нужно добавить в таблицу. Так как столбец id является автоинкрементом (он увеличивается автоматически), нам не нужно указывать значение для id – оно будет присвоено базе данных.
+updateRecord: Этот метод обновляет имя записи по указанному ID. db.update(): Этот метод обновляет существующую запись в таблице. Мы передаем имя таблицы, обновляемые данные (в данном случае только поле name) и условие для обновления. where: 'id = ?': Мы указываем, что обновление должно произойти только для записи с определенным id. Это условие идентифицирует запись, которую нужно обновить. whereArgs: [id]: это значение id передается в запрос для выполнения обновления конкретной записи.
+deleteRecord: этот метод удаляет запись по ID. db.delete(): Этот метод удаляет запись из таблицы MyTable. Мы передаем условие, по которому будет найдено, что именно нужно удалить. where: 'id = ?': Условие указывает, что необходимо удалить запись с определенным id. whereArgs: [id]: Это значение id передается в запрос для выполнения удаления записи.
+
+2.3 Создание интерфейса пользователя
+
+Теперь создадим экран с кнопками для добавления, редактирования, удаления записей, а также для отображения записей с сортировкой и без. В проекте создадим файл lib/home_screen.dart, в котором будет реализована вся логика работы с базой данных
+
+import 'package:flutter/material.dart';
+import 'db_service.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State&lt;HomeScreen&gt; createState() =&gt; _HomeScreenState();
+}
+
+class _HomeScreenState extends State&lt;HomeScreen&gt; {
+  final DBService dbService = DBService();
+  List&lt;Map&lt;String, dynamic&gt;&gt; records = [];
+
+  final TextEditingController _nameController = 
+ TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecords();
+  }
+
+  // Получение всех записей
+  Future&lt;void&gt; _fetchRecords() async {
+    final data = await dbService.getAllRecords();
+    setState(() {
+      records = data;
+    });
+  }
+
+  // Сортировка по имени
+  Future&lt;void&gt; _sortRecords() async {
+    final data = await dbService.getSortedRecords();
+    setState(() {
+      records = data; // Обновляем записи
+    });
+  }
+
+  // Добавление записи
+  Future&lt;void&gt; _addRecord() async {
+    if (_nameController.text.isNotEmpty) {
+      await dbService.addRecord(_nameController.text);
+      _nameController.clear();
+      _fetchRecords();
+    }
+  }
+
+// Редактирование записи
+  Future&lt;void&gt; _updateRecord(int id, String currentName) async {
+    // Контроллер для нового имени
+    final TextEditingController _editController =
+        TextEditingController(text: currentName);
+
+    // Показываем диалоговое окно для редактирования
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Редактировать запись'),
+          content: TextField(
+            controller: _editController,
+            decoration: const InputDecoration(
+              labelText: 'Введите новое имя',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Закрыть диалог
+              },
+              child: const Text('Отменить'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Обновляем запись, если введено новое имя
+                if (_editController.text.isNotEmpty) {
+                  await dbService.updateRecord(id, 
+   _editController.text);
+   // Обновляем список после изменения
+                  _fetchRecords();
+                  Navigator.of(context).pop(); // Закрыть диалог
+                }
+              },
+              child: const Text('Сохранить'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Удаление записи
+  Future&lt;void&gt; _deleteRecord(int id) async {
+    await dbService.deleteRecord(id);
+    _fetchRecords();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('SQLite Demo')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Введите имя',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: _addRecord,
+                child: const Text('Добавить запись'),
+              ),
+              ElevatedButton(
+                onPressed: _sortRecords,
+                child: const Text('Сортировка по имени'),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: records.length,
+              itemBuilder: (context, index) {
+                final record = records[index];
+                return ListTile(
+                  title: Text(record['name']),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+    // Передаем ID и имя
+                        onPressed: () =&gt; _updateRecord(
+                            record['id'], record['name']), 
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () =&gt; 
+  _deleteRecord(record['id']),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+2.4 Настройка главного файла main.dart
+
+Теперь настроим файл main.dart для запуска приложения и отображения экрана с функциональностью.
+
+import 'package:flutter/material.dart';
+import 'home_screen.dart';
+
+void main() {
+  runApp(const MaterialApp(home: HomeScreen()));
+}
+
+2.5 Результат работы программы
+
+Запустите приложение. Приложение откроется, и вы сможете:
+Добавлять записи;
+Редактировать записи;
+Удалять записи;
+Смотреть записи без сортировки и с сортировкой по имени.
+
+ 
+Рисунок 16 – Результат добавления новой записи
+
+
+Рисунок 17 – Редактирование записи
+
+
+
+Рисунок 18 – Удаление записи из таблицы
+
+
+Рисунок 19 – Результат выборки с сортировкой по полю name по убыванию
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3 Контрольные вопросы 
+
+1. Что представляет собой SQLite? 
+2. Чтот нужно сделать предварителььно для работы с базой данных SQLite?
+3. Какие методы реализуют основную логику работы с базой данных?
+4. Как выполнить добавление записи?
+5. Как выполнить изменение и удаление записи?
+6. Как выполнить выборку записей?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать все описанные операции работы с БД.
+Лабораторная работа №2.9 – Разработка сервисов
+1 Цель работы 
+
+Получить практические навыки по созданию и настройке сервисов в Android-приложениях.
+
+2 Порядок выполнения работы
+2.1 Общие сведения о сервисах
+
+Сервисы представляют собой особую организацию приложения. В отличие от activity они не требуют наличия визуального интерфейса. Сервисы играют важную роль в разработке мобильных приложений, предоставляя возможность выполнения фоновых задач и обеспечивая независимость от основного пользовательского интерфейса. Сервисы позволяют приложениям выполнять долгосрочные операции без вмешательства пользователя, взаимодействовать с аппаратными ресурсами устройства и предоставлять различные функции, которые доступны вне зависимости от текущей активности приложения.
+В контексте мобильной разработки на платформе Android, сервисы представляют собой важный инструмент для создания приложений, которые способны выполнять задачи в фоновом режиме, даже когда пользователь не активно взаимодействует с приложением. Это позволяет реализовать разнообразные функциональности, такие как фоновая загрузка данных, обработка уведомлений, аудио- и видео-проигрывание, а также многие другие сценарии использования.
+
+2.2 Создание сервиса
+
+Перед созданием сервиса необходимо добавить библиотеку в проект. provider – библиотека для управления состоянием. Она позволяет предоставлять доступ к сервису RandomNumberService из любого места в приложении. Добавьте её в свой проект командой flutter pub add provider.
+Создайте файл random_number_service.dart в папке lib.
+В созданном классе, опишите ваш сервис следующим образом:
+
+import 'dart:math';
+
+class RandomNumberService {
+  final _random = Random();
+
+  /// Генерирует случайное число от [min] до [max] включительно.
+  int generateRandomNumber(int min, int max) {
+    return min + _random.nextInt(max - min + 1);
+  }
+}
+
+Сервис использует класс Random из библиотеки dart:math.
+Метод generateRandomNumber: параметры min и max определяют диапазон случайного числа. Возвращает случайное число между min и max.
+Назначение: сервис отделяет логику генерации числа от пользовательского интерфейса, что упрощает тестирование и поддержку.
+
+2.3 Создание пользовательского интерфейса
+
+Чтобы проверить работоспособность вашего приложения и увидеть пользовательский интерфейс (UI), вам нужно создать и настроить макет интерфейса и связать его с вашей активностью. Давайте создадим простой UI для вашего приложения.
+Создайте файл lib/random_number_page.dart в папке lib.
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'random_number_service.dart';
+
+// ignore: use_key_in_widget_constructors
+class RandomNumberPage extends StatefulWidget {
+  @override
+  State&lt;RandomNumberPage&gt; createState() =&gt; 
+     _RandomNumberPageState();
+}
+
+class _RandomNumberPageState extends State&lt;RandomNumberPage&gt; {
+  int? _randomNumber;
+
+  void _generateNumber() {
+    final randomNumberService = 
+    context.read&lt;RandomNumberService&gt;();
+    setState(() {
+      _randomNumber = randomNumberService.
+   generateRandomNumber(1, 100);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Генератор случайных чисел'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_randomNumber != null)
+              Text(
+                'Сгенерированное число: $_randomNumber',
+                style: const TextStyle(fontSize: 24, fontWeight: 
+   FontWeight.bold),
+              ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _generateNumber,
+              child: const Text('Сгенерировать случайное число'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+Рисунок 20 – Шаблон UI 
+
+Состояние _randomNumber: хранит последнее сгенерированное число. Используется для обновления интерфейса.
+Метод _generateNumber: получает экземпляр RandomNumberService через context.read. Вызывает метод generateRandomNumber и обновляет состояние с помощью setState.
+UI-логика: отображает текст с сгенерированным числом, если оно есть. Кнопка вызывает метод _generateNumber.
+
+2.4 Связь макета с активностью
+
+Чтобы ваша активность использовала созданный макет, отредактируйте код в файле main.dart в папке lib.
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'random_number_service.dart';
+import 'random_number_page.dart';
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider&lt;RandomNumberService&gt;(
+          create: (_) =&gt; RandomNumberService(),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Random Number App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: RandomNumberPage(),
+    );
+  }
+}
+
+Рассмотрим подробнее:
+MultiProvider: используется для предоставления сервиса RandomNumberService в дереве виджетов. Теперь любой виджет в приложении может получить доступ к сервису через Provider.of или context.read.
+MyApp: создаёт корневую структуру приложения. Устанавливает RandomNumberPage как начальный экран приложения.
+
+Рисунок 21 – Результат работы сервиса
+
+Таким образом мы сделали следующее:
+Создали поле RandomNumberService randomNumberService для хранения ссылки на сервис.
+Создали поле boolean isBound для отслеживания состояния связи с сервисом.
+Реализовали ServiceConnection, чтобы устанавливать и разрывать связь с сервисом.
+В методе onCreate, инициализировали кнопку и TextView.
+Создали обработчик нажатия на кнопку, который вызывает метод generateRandomNumber из сервиса и отображает результат в TextView.
+В методе onCreate, связали активность с сервисом, используя bindService.
+Переопределили метод onDestroy, чтобы убедиться, что сервис отключается при уничтожении активности.
+Этот код обеспечивает связь между активностью и сервисом, позволяя активности вызывать методы сервиса и отображать результаты операции в пользовательском интерфейсе.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3 Контрольные вопросы 
+
+1.Что представляет собой сервис? 
+2.Чтот нужно сделать для создания сервиса?
+3.Как приложение связывается с сервисом?
+
+4 Задание для самостоятельного выполнения
+
+Реализовать программно создание и использование сервиса.

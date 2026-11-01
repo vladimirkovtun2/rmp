@@ -9,11 +9,26 @@ import 'package:rmp_9plus/main.dart';
 
 Future<void> _openLab(WidgetTester tester, String title) async {
   await tester.pumpWidget(const LabsApp());
+  // Элемент может быть ниже видимой области — докручиваем
+  await tester.scrollUntilVisible(
+    find.text(title),
+    80,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pump();
   await tester.tap(find.text(title));
   // pumpAndSettle нельзя: CircularProgressIndicator крутится бесконечно,
   // поэтому завершаем анимацию перехода явно
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 350));
+}
+
+/// Несколько кадров: закрывающийся маршрут/диалог удаляется из дерева
+/// не сразу после анимации, а на следующем кадре
+Future<void> _settle(WidgetTester tester) async {
+  for (var i = 0; i < 5; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }
 
 void main() {
@@ -23,7 +38,19 @@ void main() {
     await tester.pumpWidget(const LabsApp());
 
     expect(find.text('Лабораторные работы'), findsOneWidget);
-    for (final n in ['2', '6', '7', '8', '9', '10', '11']) {
+    // Верх списка
+    for (final n in ['2', '6', '7']) {
+      expect(find.text('Лабораторная работа №$n'), findsOneWidget);
+    }
+    // Список длиннее экрана — докручиваем до последних работ
+    await tester.scrollUntilVisible(
+      find.text('Лабораторная работа №2.2'),
+      80,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    // Низ списка
+    for (final n in ['11', '2.1', '2.2']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -167,6 +194,112 @@ void main() {
     await tester.pump();
     expect(find.text('Сначала выберите картинку — или используйте другой тип'),
         findsWidgets);
+  });
+
+  testWidgets('Лабораторная 2.1: диалог выхода', (WidgetTester tester) async {
+    await _openLab(tester, 'Лабораторная работа №2.1');
+
+    await tester.tap(find.text('AlertDialog: Да / Нет / Отмена'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('Выход'), findsOneWidget);
+    expect(find.text('Да'), findsOneWidget);
+    expect(find.text('Нет'), findsOneWidget);
+    expect(find.text('Отмена'), findsOneWidget);
+
+    await tester.tap(find.text('Отмена'));
+    await _settle(tester);
+    expect(find.text('Выход'), findsNothing);
+  });
+
+  testWidgets('Лабораторная 2.1: список элементов', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.1');
+
+    await tester.tap(find.text('AlertDialog со списком'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('Пункт 2'), findsOneWidget);
+
+    await tester.tap(find.text('Пункт 2'));
+    await _settle(tester);
+    expect(find.text('Вы выбрали: Пункт 2'), findsWidgets);
+  });
+
+  testWidgets('Лабораторная 2.1: множественный выбор', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.1');
+
+    await tester.tap(find.text('AlertDialog: множественный выбор'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.tap(find.text('Пункт 1'));
+    await tester.pump();
+    await tester.tap(find.text('Пункт 3'));
+    await tester.pump();
+    await tester.tap(find.text('Да'));
+    await _settle(tester);
+
+    expect(find.text('Вы выбрали: Пункт 1, Пункт 3'), findsWidgets);
+  });
+
+  testWidgets('Лабораторная 2.1: пользовательский ввод', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.1');
+
+    await tester.tap(find.text('Пользовательский диалог'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.enterText(find.byType(TextField), 'Привет, диалог');
+    await tester.pump();
+    await tester.tap(find.text('Да'));
+    await _settle(tester);
+
+    expect(find.text('Вы ввели: Привет, диалог'), findsWidgets);
+  });
+
+  testWidgets('Лабораторная 2.1: пикеры открываются', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.1');
+
+    // TimePicker
+    await tester.tap(find.text('TimePickerDialog'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(TimePickerDialog), findsOneWidget);
+    // Закрываем тапом по барьеру
+    await tester.tapAt(const Offset(5, 5));
+    await _settle(tester);
+
+    // DatePicker
+    await tester.tap(find.text('DatePickerDialog'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await _settle(tester);
+  });
+
+  testWidgets('Лабораторная 2.2: превью меняет цвет по нажатию', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.2');
+
+    expect(find.text('Hello, Widget!'), findsOneWidget);
+    expect(find.textContaining('Цвет фона: Голубой'), findsOneWidget);
+
+    await tester.tap(find.text('Hello, Widget!'));
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.textContaining('Цвет фона: Фиолетовый'), findsOneWidget);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (
