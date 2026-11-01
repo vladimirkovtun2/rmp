@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
+import 'package:rmp_9plus/labs/lab_06/calculator_screen.dart';
 import 'package:rmp_9plus/labs/lab_11/maps_urls.dart';
 import 'package:rmp_9plus/main.dart';
 
@@ -22,9 +23,9 @@ void main() {
     await tester.pumpWidget(const LabsApp());
 
     expect(find.text('Лабораторные работы'), findsOneWidget);
-    expect(find.text('Лабораторная работа №9'), findsOneWidget);
-    expect(find.text('Лабораторная работа №10'), findsOneWidget);
-    expect(find.text('Лабораторная работа №11'), findsOneWidget);
+    for (final n in ['2', '6', '7', '8', '9', '10', '11']) {
+      expect(find.text('Лабораторная работа №$n'), findsOneWidget);
+    }
   });
 
   testWidgets('Переход к лабораторной и обратно', (
@@ -39,6 +40,133 @@ void main() {
     await tester.pump();
 
     expect(find.text('Лабораторные работы'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2: пятнашки', (WidgetTester tester) async {
+    await _openLab(tester, 'Лабораторная работа №2');
+
+    expect(find.text('Пятнашки'), findsOneWidget);
+    expect(find.text('Ходов: 0'), findsOneWidget);
+
+    await tester.tap(find.text('Перемешать'));
+    await tester.pump();
+    expect(find.text('Ходов: 0'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 6: калькулятор считает', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №6');
+
+    // Поиск ограничиваем экраном лабораторной: на главном экране
+    // под ним в списке тоже есть тексты «7», «10» и т.п. (аватары номеров)
+    final lab = find.byType(Scaffold).last;
+
+    await tester.tap(find.descendant(of: lab, matching: find.text('7')));
+    await tester.pump();
+    await tester.tap(find.descendant(of: lab, matching: find.text('+')));
+    await tester.pump();
+    await tester.tap(find.descendant(of: lab, matching: find.text('3')));
+    await tester.pump();
+    await tester.tap(find.descendant(of: lab, matching: find.text('=')));
+    await tester.pump();
+
+    expect(
+      find.descendant(of: lab, matching: find.text('10')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Лабораторная 6: экран настроек применяется', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №6');
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('Настройки'), findsOneWidget);
+
+    // ListView строит элементы лениво — скроллим к нужным.
+    // Последний Scrollable в дереве — из верхнего маршрута (настройки)
+    final scrollable = find.byType(Scrollable).last;
+
+    // Меняем заголовок главного экрана
+    await tester.scrollUntilVisible(
+      find.text('Заголовок главного экрана'),
+      80,
+      scrollable: scrollable,
+    );
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'Супер-калькулятор');
+
+    await tester.scrollUntilVisible(
+      find.text('Применить'),
+      80,
+      scrollable: scrollable,
+    );
+    await tester.pump();
+    await tester.tap(find.text('Применить'));
+    // Несколько кадров: анимация pop 300 мс + кадр на удаление маршрута
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    // Вернулись на калькулятор с новым заголовком — pop с результатом.
+    // Проверяем внутри экрана калькулятора: в тестовом дереве маршруты
+    // могут «догорать» пару кадров после pop
+    final calculator = find.byType(CalculatorScreen);
+    expect(calculator, findsOneWidget);
+    expect(
+      find.descendant(of: calculator, matching: find.text('Супер-калькулятор')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Лабораторная 7: создание матрицы', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №7');
+
+    // По умолчанию 3×4
+    await tester.tap(find.text('Создать'));
+    await tester.pump();
+
+    expect(find.text('Исходная матрица K(3×4)'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 8: экран напоминалки', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №8');
+
+    // Даём асинхронной инициализации плагина отработать (в тесте она
+    // падает с MissingPluginException, которая обрабатывается экраном).
+    // Интерфейс не ждёт инициализации и должен быть виден сразу.
+    await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+
+    expect(find.text('Напоминалка'), findsOneWidget);
+
+    // Кнопки внизу списка — прокручиваем, чтобы ListView построил элементы.
+    // ListView ищем внутри экрана лабораторной: на главном экране
+    // под ним тоже есть ListView
+    final lab = find.byType(Scaffold).last;
+    final labList = find.descendant(
+      of: lab,
+      matching: find.byType(ListView),
+    );
+    await tester.drag(labList, const Offset(0, -600));
+    await tester.pump();
+    expect(find.text('С кнопками'), findsOneWidget);
+
+    // Без картинки «Большая картинка» показывает подсказку,
+    // не обращаясь к плагину
+    await tester.tap(find.text('Большая картинка'));
+    await tester.pump();
+    expect(find.text('Сначала выберите картинку — или используйте другой тип'),
+        findsWidgets);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (

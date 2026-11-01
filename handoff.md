@@ -4,8 +4,9 @@
 Каждая работа живёт в отдельной папке и ничего не знает про остальные;
 на главном экране есть список всех работ, из которого открывается нужная.
 
-Текущая рабочая лабораторная — **№9 «Звёздное небо»** (CustomPainter).
-Демо-счётчик из шаблона удалён.
+В проекте 7 работ: №2, 6, 7, 8 (перенесены из отдельных проектов в папке
+`labs_cut/`) и №9, 10, 11 (сделаны в этом проекте). Демо-счётчик из
+шаблона удалён.
 
 ## Структура
 
@@ -16,21 +17,72 @@ lib/
 │   └── home_screen.dart             # Главный экран со списком лабораторных
 └── labs/
     ├── labs.dart                    # Реестр работ: список labs с LabInfo
+    ├── lab_02/
+    │   └── fifteen_puzzle_screen.dart   # Пятнашки 4×4 (FifteenPuzzleScreen)
+    ├── lab_06/
+    │   └── calculator_screen.dart       # Калькулятор + настройки (CalculatorScreen,
+    │                                    #   SettingsScreen, AppSettings)
+    ├── lab_07/
+    │   └── matrix_screen.dart           # Матрица K(m,n) (MatrixScreen)
+    ├── lab_08/
+    │   └── notifications_screen.dart    # Локальные уведомления (NotifyScreen)
     ├── lab_09/
-    │   ├── lab_09_screen.dart       # Экран работы: грузит ассет, держит CustomPaint
-    │   └── star_sky_painter.dart    # StarSkyPainter extends CustomPainter (статика)
-    └── lab_10/
-        ├── lab_10_screen.dart       # Экран работы: контроллеры + AnimatedBuilder
-        └── star_sky_animated_painter.dart # StarSkyAnimatedPainter (анимации)
+    │   ├── lab_09_screen.dart           # Экран: грузит ассет, держит CustomPaint
+    │   └── star_sky_painter.dart        # StarSkyPainter (статика)
+    ├── lab_10/
+    │   ├── lab_10_screen.dart           # Экран: контроллеры + AnimatedBuilder
+    │   └── star_sky_animated_painter.dart # StarSkyAnimatedPainter (анимации)
     └── lab_11/
-        ├── lab_11_screen.dart       # Экран работы: режимы ввода + кнопки
-        └── maps_urls.dart           # MapsUrls: сборка URL Google Maps/Street View
+        ├── lab_11_screen.dart           # Экран: режимы ввода + кнопки
+        └── maps_urls.dart               # MapsUrls: URL Google Maps/Street View
 
 assets/
 └── images/
-    ├── spaceship.png                # Корабль (ассет из ресурсов, квадратный)
+    ├── spaceship.png                # Корабль (ассет из ресурсов)
     └── cuckoo.png                   # Кукушка (сгенерирована, 240×240)
+
+labs_cut/                            # Исходные проекты лаб 2/6/7/8 (архив,
+                                     # в сборку не входит, исключён из анализа)
 ```
+
+## Лабораторная №2 «Пятнашки»
+
+Поле 4×4, плитки двигаются кликом в пустую ячейку (подсветка доступных
+ходов и последнего хода). Перемешивание — 200 случайных допустимых ходов
+из собранного состояния (гарантия решаемости). Своя конфигурация — ввод
+16 чисел через запятую с валидацией. Перенесено из `labs_cut/rmp2`
+без изменений логики (удалены только отдельные main/MyApp).
+
+## Лабораторная №6 «Калькулятор»
+
+Обычный четырёхдействийный калькулятор (цепочки операций, процент,
+смена знака, диалог при делении на ноль) + экран настроек:
+цвет фона, цвет текста дисплея, заголовок. Возврат результата —
+`Navigator.push/pop(result)` (аналог startActivityForResult).
+Радиокнопки на новом API (`RadioGroup` ancestor — `groupValue/onChanged`
+у RadioListTile deprecated с Flutter 3.32). Перенесено из `labs_cut/rmp6`.
+
+## Лабораторная №7 «Матрица K(m,n)»
+
+Задание: найти максимум в каждой строке и заменить заданным числом.
+Ввод размеров (1–30), ручной ввод ячеек или случайное заполнение,
+разметка под ориентацию через `OrientationBuilder` (портрет/ландшафт).
+Перенесено из `labs_cut/rmp7`.
+
+## Лабораторная №8 «Напоминалка»
+
+Локальные уведомления (`flutter_local_notifications`): 4 типа — с кнопкой,
+длинный текст (BigTextStyle), большая картинка (BigPictureStyle, файл
+из галереи через `image_picker`), InboxStyle. Звук/вибрация/LED — через
+отдельные каналы под каждую комбинацию. Отличие от оригинала
+(`labs_cut/rmp8`): инициализация плагина перенесена из `main()` в
+`initState` экрана (в фоне, не блокирует UI, ошибки плагина гасятся).
+
+Настройки Android для этой лабораторной:
+- `AndroidManifest.xml`: разрешение `POST_NOTIFICATIONS` (Android 13+);
+- `android/app/build.gradle.kts`: core library desugaring
+  (`isCoreLibraryDesugaringEnabled` + `desugar_jdk_libs:2.1.4`) —
+  требование flutter_local_notifications v19.
 
 ## Лабораторная №9 «Звёздное небо»
 
@@ -38,21 +90,15 @@ assets/
 (`lib/labs/lab_09/star_sky_painter.dart`):
 
 - ночное небо — `drawRect` с линейным градиентом;
-- ~140 звёзд — `drawCircle` разного радиуса, оттенка (белый/тёплый/холодный)
-  и прозрачности, у крупных — свечение через `MaskFilter.blur`;
-  расположение фиксировано (seeded `Random(9)`), чтобы небо не прыгало
-  между перерисовками;
+- ~140 звёзд — `drawCircle` разного радиуса, оттенка и прозрачности,
+  у крупных — свечение через `MaskFilter.blur`; расположение фиксировано
+  (seeded `Random(9)`), чтобы небо не прыгало между перерисовками;
 - месяц-серп — полный круг, из которого вторым пересекающимся кругом
   с `BlendMode.dstOut` через `canvas.saveLayer` вырезается «тень»;
   (evenOdd с двумя частично пересекающимися кругами тут не подходит —
   внешняя часть вырезающего круга тоже закрасилась бы);
-- корабль — PNG из assets, рисуется через `drawImageRect` с наклоном
+- корабль — PNG из assets через `drawImageRect` с наклоном
   (`canvas.save/translate/rotate/restore`).
-
-Загрузка изображения — в `Lab09Screen`: `rootBundle.load` →
-`ui.instantiateImageCodec`, до готовности показывается
-`CircularProgressIndicator`. Картинка передаётся в painter, `shouldRepaint`
-сравнивает её со старой.
 
 ## Лабораторная №10 «Звёздное небо — анимации»
 
@@ -91,28 +137,21 @@ AnimatedBuilder (значения контроллеров передаются 
   кнопка показывает подсказку.
 - Валидация: пустые поля, числа с запятой-разделителем, широта ±90,
   долгота ±180 — ошибки через SnackBar.
-- Зависимости: `url_launcher`, dev — `url_launcher_platform_interface`
-  (для подмены платформы в тестах).
 - В `android/app/src/main/AndroidManifest.xml` добавлен `<queries>` для
   схемы https (package visibility Android 11+), без него launchUrl падает.
 - Тесты: `test/maps_urls_test.dart` (юнит, сборка URL) и виджет-тесты
   с `FakeUrlLauncher` (проверка URL, уходящего в launchUrl через UI).
 
+## Зависимости
+
+- `url_launcher` (лаба 11), dev: `url_launcher_platform_interface` (тесты);
+- `flutter_local_notifications` + `image_picker` (лаба 8).
+- Папка `labs_cut/` исключена из анализа в `analysis_options.yaml`.
+
 ## Как добавить новую лабораторную
 
-1. Создать папку `lib/labs/lab_NN/` и в ней экран (StatefulWidget/StatelessWidget
-   со своим `Scaffold`).
-2. Добавить запись в список `labs` в `lib/labs/labs.dart`:
-
-   ```dart
-   LabInfo(
-     number: '10',
-     title: 'Лабораторная работа №10',
-     description: 'Короткое описание',
-     builder: (_) => const Lab10Screen(),
-   ),
-   ```
-
+1. Создать папку `lib/labs/lab_NN/` и в ней экран (со своим `Scaffold`).
+2. Добавить запись в список `labs` в `lib/labs/labs.dart`.
 3. Готово — работа появится на главном экране. Другие файлы трогать не нужно.
 
 ## Как запустить
@@ -120,18 +159,16 @@ AnimatedBuilder (значения контроллеров передаются 
 ```bash
 flutter run          # запуск на подключённом устройстве/эмуляторе
 flutter analyze      # проверка линтером
-flutter test         # виджет-тесты
+flutter test         # тесты (юнит + виджет)
+flutter build apk --debug   # проверка сборки под Android
 ```
-
-После изменения `pubspec.yaml` (добавления ассетов) нужен `flutter pub get`.
 
 ## Текущее состояние
 
-- Главный экран со списком — готов, в списке работы №9 и №10.
-- Лабораторная №9 реализована: небо, звёзды, серп луны, корабль из assets.
-- Лабораторная №10 реализована: мерцание звёзд, фазы луны, полёт корабля,
-  аналоговые часы (соотношение стрелок 12:1), кукушка по условию угла.
-- Лабораторная №11 реализована: поиск места по адресу/координатам,
-  открытие Google Maps и Street View во внешнем приложении.
-- Виджет-тесты проверяют главный экран, переходы и сценарии лабораторной №11.
-- Лабораторных №1–8 в проекте нет — работа начата с №9.
+- Главный экран: список из 7 работ (№2, 6, 7, 8, 9, 10, 11).
+- Лабораторные №2, 6, 7, 8 перенесены из `labs_cut/` и работают в общем
+  приложении (для №8 добавлены POST_NOTIFICATIONS и desugaring).
+- Лабораторные №9, 10, 11 реализованы в проекте (см. разделы выше).
+- 12 тестов зелёные: список, переходы, смоук-сценарии лаб 2/6/7/8,
+  сценарии лаб 11, юнит-тесты URL.
+- Папку `labs_cut/` можно удалить — это архивная копия исходников.

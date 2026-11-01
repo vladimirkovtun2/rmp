@@ -34,6 +34,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Лабораторная 8: локальные уведомления и выбор картинки
+  flutter_local_notifications: ^19.0.0
+  image_picker: ^1.1.2
+  # Лабораторная 11: открытие внешних приложений (карты)
   url_launcher: ^6.3.2
 
 dev_dependencies:

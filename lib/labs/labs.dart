@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'lab_02/fifteen_puzzle_screen.dart';
+import 'lab_06/calculator_screen.dart';
+import 'lab_07/matrix_screen.dart';
+import 'lab_08/notifications_screen.dart';
 import 'lab_09/lab_09_screen.dart';
 import 'lab_10/lab_10_screen.dart';
 import 'lab_11/lab_11_screen.dart';
@@ -25,6 +29,30 @@ class LabInfo {
 /// 1. Создайте папку lib/labs/lab_NN/ с экраном работы.
 /// 2. Добавьте её в список ниже.
 final List<LabInfo> labs = [
+  LabInfo(
+    number: '02',
+    title: 'Лабораторная работа №2',
+    description: 'Пятнашки 4×4',
+    builder: (_) => const FifteenPuzzleScreen(),
+  ),
+  LabInfo(
+    number: '06',
+    title: 'Лабораторная работа №6',
+    description: 'Калькулятор с настройками',
+    builder: (_) => const CalculatorScreen(),
+  ),
+  LabInfo(
+    number: '07',
+    title: 'Лабораторная работа №7',
+    description: 'Обработка матрицы K(m,n)',
+    builder: (_) => const MatrixScreen(),
+  ),
+  LabInfo(
+    number: '08',
+    title: 'Лабораторная работа №8',
+    description: 'Локальные уведомления',
+    builder: (_) => const NotifyScreen(),
+  ),
   LabInfo(
     number: '09',
     title: 'Лабораторная работа №9',

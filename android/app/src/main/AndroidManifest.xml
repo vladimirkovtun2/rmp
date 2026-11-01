@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Лабораторная 8: уведомления на Android 13+ (API 33) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="rmp_9plus"
         android:name="${applicationName}"
