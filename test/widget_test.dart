@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.2'),
+      find.text('Лабораторная работа №2.3'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
     // Низ списка
-    for (final n in ['11', '2.1', '2.2']) {
+    for (final n in ['11', '2.1', '2.2', '2.3']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -300,6 +300,34 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.textContaining('Цвет фона: Фиолетовый'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2.3: корзина считается', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.3');
+
+    expect(find.text('Товары'), findsOneWidget);
+    expect(find.text('Сумма: 0.00 ₽'), findsOneWidget);
+    expect(find.text('Товары: 0'), findsOneWidget);
+
+    // Добавляем пиццу (890 ₽)
+    await tester.tap(find.byIcon(Icons.add_circle).first);
+    await tester.pump();
+    expect(find.text('Товары: 1'), findsOneWidget);
+    expect(find.text('Сумма: 890.00 ₽'), findsOneWidget);
+
+    // Ещё одна пицца
+    await tester.tap(find.byIcon(Icons.add_circle).first);
+    await tester.pump();
+    expect(find.text('Товары: 2'), findsOneWidget);
+    expect(find.text('Сумма: 1780.00 ₽'), findsOneWidget);
+
+    // Убираем одну
+    await tester.tap(find.byIcon(Icons.remove_circle).first);
+    await tester.pump();
+    expect(find.text('Товары: 1'), findsOneWidget);
+    expect(find.text('Сумма: 890.00 ₽'), findsOneWidget);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (
