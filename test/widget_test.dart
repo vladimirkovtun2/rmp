@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.8'),
+      find.text('Лабораторная работа №2.9'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
     // Низ списка (видны последние ~7 работ)
-    for (final n in ['2.5', '2.6', '2.7', '2.8']) {
+    for (final n in ['2.6', '2.7', '2.8', '2.9']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -463,6 +463,22 @@ void main() {
     await tester.pump();
     expect(find.text('Анна'), findsNothing);
     expect(find.text('Ольга'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2.9: сервис генерирует число', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.9');
+
+    expect(find.text('Сгенерированное число:'), findsNothing);
+
+    await tester.tap(find.text('Сгенерировать случайное число'));
+    await tester.pump();
+
+    expect(
+      find.textContaining('Сгенерированное число:'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (
