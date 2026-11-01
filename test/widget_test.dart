@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.4'),
+      find.text('Лабораторная работа №2.6'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
     // Низ списка
-    for (final n in ['11', '2.1', '2.2', '2.3', '2.4']) {
+    for (final n in ['11', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -353,6 +353,51 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pump(const Duration(seconds: 6));
     expect(find.text('Данные успешно загружены!'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2.5: фрагменты добавляются и удаляются', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.5');
+
+    expect(find.text('Фрагмент №1'), findsNothing);
+
+    await tester.tap(find.text('Добавить фрагмент'));
+    await tester.pump();
+    expect(find.text('Фрагмент №1'), findsOneWidget);
+
+    await tester.tap(find.text('Добавить фрагмент'));
+    await tester.pump();
+    expect(find.text('Фрагмент №2'), findsOneWidget);
+
+    await tester.tap(find.text('Убрать фрагмент'));
+    await tester.pump();
+    expect(find.text('Фрагмент №2'), findsNothing);
+    expect(find.text('Фрагмент №1'), findsOneWidget);
+  });
+
+  testWidgets('Лабораторная 2.6: плеер в исходном состоянии', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.6');
+
+    expect(find.text('Трек не выбран'), findsOneWidget);
+    expect(find.text('Выбрать трек на устройстве'), findsOneWidget);
+    expect(find.byKey(const Key('play_button')), findsOneWidget);
+
+    // Пока нет трека и не идёт воспроизведение — пауза и стоп выключены
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('pause_button')))
+          .onPressed,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('stop_button')))
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (

@@ -11,6 +11,8 @@ import 'lab_2_1/lab_21_screen.dart';
 import 'lab_2_2/lab_22_screen.dart';
 import 'lab_2_3/lab_23_screen.dart';
 import 'lab_2_4/lab_24_screen.dart';
+import 'lab_2_5/lab_25_screen.dart';
+import 'lab_2_6/lab_26_screen.dart';
 
 /// Описание одной лабораторной работы для главного экрана.
 class LabInfo {
@@ -98,5 +100,17 @@ final List<LabInfo> labs = [
     title: 'Лабораторная работа №2.4',
     description: 'Future: фоновая задача',
     builder: (_) => const Lab24Screen(),
+  ),
+  LabInfo(
+    number: '2.5',
+    title: 'Лабораторная работа №2.5',
+    description: 'Фрагменты (виджеты)',
+    builder: (_) => const Lab25Screen(),
+  ),
+  LabInfo(
+    number: '2.6',
+    title: 'Лабораторная работа №2.6',
+    description: 'Мультимедиа: аудиоплеер',
+    builder: (_) => const Lab26Screen(),
   ),
 ];

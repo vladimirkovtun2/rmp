@@ -39,6 +39,8 @@ dependencies:
   image_picker: ^1.1.2
   # Лабораторная 11: открытие внешних приложений (карты)
   url_launcher: ^6.3.2
+  audioplayers: ^6.7.1
+  file_selector: ^1.1.0
 
 dev_dependencies:
   flutter_test:
