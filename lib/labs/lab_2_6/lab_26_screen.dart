@@ -100,7 +100,11 @@ class _Lab26ScreenState extends State<Lab26Screen> {
   }
 
   Future<void> _stop() async {
-    await _player.stop();
+    // НЕ player.stop(): в audioplayers он освобождает источник, и после
+    // него resume() уже нечего играть — трек пришлось бы выбирать заново.
+    // Пауза + сброс позиции даёт «стоп» без потери источника.
+    await _player.pause();
+    await _player.seek(Duration.zero);
     setState(() {
       _playerState = PlayerState.stopped;
       _position = Duration.zero;

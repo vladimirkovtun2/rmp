@@ -44,13 +44,13 @@ void main() {
     }
     // Список длиннее экрана — докручиваем до последних работ
     await tester.scrollUntilVisible(
-      find.text('Лабораторная работа №2.6'),
+      find.text('Лабораторная работа №2.7'),
       80,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
     // Низ списка
-    for (final n in ['11', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6']) {
+    for (final n in ['11', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7']) {
       expect(find.text('Лабораторная работа №$n'), findsOneWidget);
     }
   });
@@ -398,6 +398,26 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('Лабораторная 2.7: экран файлов и обработка ошибок', (
+    WidgetTester tester,
+  ) async {
+    await _openLab(tester, 'Лабораторная работа №2.7');
+
+    // Конфигурация и действия на месте
+    expect(find.text('Dialog Title'), findsOneWidget);
+    expect(find.text('Pick file'), findsOneWidget);
+    expect(find.text('Pick folder'), findsOneWidget);
+    expect(find.text('Save file'), findsOneWidget);
+    expect(find.text('Clear temporary files'), findsOneWidget);
+
+    // В тесте нативный плагин недоступен (UnimplementedError ловится
+    // общим catch и уходит в SnackBar)
+    await tester.tap(find.text('Pick file'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(SnackBar), findsWidgets);
   });
 
   testWidgets('Лабораторная 11: режим адреса — одно поле, улицы недоступны', (
